@@ -73,6 +73,11 @@ class UKGAPIClient:
         response = requests.post(f"{self.BASE_URL}/api/v2/client/time-off/requests", headers=self.headers, json=data)
         response.raise_for_status()
         return response.json()
+    
+    def get_vacation_request_by_id(self, request_id):
+        response = requests.get(f"{self.BASE_URL}/api/v2/client/time-off/requests/{request_id}", headers=self.headers)
+        response.raise_for_status()
+        return response.json()
 
 if __name__ == '__main__':
     client = UKGAPIClient()
@@ -105,5 +110,7 @@ if __name__ == '__main__':
     vacation_request = client.create_vacation_request(data=vacation_request_data)
     print("Vacation Request:", vacation_request)
 
-    
+    vacation_request_by_id = client.get_vacation_request_by_id(request_id=vacation_request['id'])
+    print("Vacation Request by ID:", vacation_request_by_id)
+
 
