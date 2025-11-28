@@ -716,5 +716,101 @@ def org_hierarchy():
     }
     return jsonify(hierarchy)
 
+# ==================== UKG PRO API ENDPOINTS ====================
+
+# Personnel Information
+@app.route('/personnel/v1/employees', methods=['GET'])
+def pro_employees():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = [{
+        'employeeId': 'EMP001',
+        'firstName': 'John',
+        'lastName': 'Doe',
+        'status': 'Active'
+    }]
+    return jsonify(data)
+
+@app.route('/personnel/v1/employees/<employee_id>', methods=['GET'])
+def pro_employee(employee_id):
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    return jsonify({
+        'employeeId': employee_id,
+        'firstName': 'John',
+        'lastName': 'Doe',
+        'status': 'Active',
+        'hireDate': '2023-01-15'
+    })
+
+# Time Management
+@app.route('/timemanagement/v1/timecards', methods=['GET', 'POST'])
+def pro_timecards():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    if request.method == 'GET':
+        return jsonify([{
+            'employeeId': 'EMP001',
+            'payPeriod': '2024-01-01/2024-01-14',
+            'totalHours': 80.0
+        }])
+    
+    return jsonify({'success': True}), 201
+
+# Payroll
+@app.route('/payroll/v1/paychecks', methods=['GET'])
+def pro_paychecks():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    return jsonify([{
+        'employeeId': 'EMP001',
+        'payDate': '2024-01-15',
+        'grossPay': 5000.00,
+        'netPay': 3800.00
+    }])
+
+# Benefits
+@app.route('/benefits/v1/enrollments', methods=['GET'])
+def pro_enrollments():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    return jsonify([{
+        'employeeId': 'EMP001',
+        'planId': 'HEALTH001',
+        'planName': 'Health Insurance',
+        'status': 'Active'
+    }])
+
+# Recruiting
+@app.route('/recruiting/v1/jobs', methods=['GET'])
+def pro_jobs():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    return jsonify([{
+        'jobId': 'JOB001',
+        'title': 'Software Engineer',
+        'status': 'Open',
+        'department': 'Engineering'
+    }])
+
+# Performance Management
+@app.route('/performance/v1/reviews', methods=['GET'])
+def pro_reviews():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    return jsonify([{
+        'reviewId': 'REV001',
+        'employeeId': 'EMP001',
+        'reviewPeriod': '2024',
+        'status': 'In Progress'
+    }])
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
