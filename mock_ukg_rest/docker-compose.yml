@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  ukg-mock-api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: python mock_server.py
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v2/client/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
