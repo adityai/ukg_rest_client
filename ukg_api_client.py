@@ -17,6 +17,15 @@ class UKGAPIClient:
     APP_SECRET = 'test_secret'
     CLIENT_ID = 'test_client'
 
+    def __init__(self):
+        token = self.get_access_token()
+        
+        self.headers = {
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json'
+        }
+
+
     def get_access_token(self):
         auth_url = f"{self.BASE_URL}/api/v2/client/tokens"
         credentials = base64.b64encode(f'{self.APP_ID}:{self.APP_SECRET}'.encode()).decode()
@@ -36,35 +45,27 @@ class UKGAPIClient:
         response.raise_for_status()
         return response.json()['access_token']
 
-    def list_companies(self):
-        token = self.get_access_token()
-        
-        headers = {
-            'Authorization': f'Bearer {token}',
-            'Content-Type': 'application/json'
-        }
-        
-        response = requests.get(f"{self.BASE_URL}/api/v2/client/companies", headers=headers)
+    def list_companies(self):        
+        response = requests.get(f"{self.BASE_URL}/api/v2/client/companies", headers=self.headers)
         response.raise_for_status()
         return response.json()
     
-    def create_timesheet(self):
-        token = self.get_access_token()
+    def create_timesheet(self, data):
         
-        headers = {
-            'Authorization': f'Bearer {token}',
-            'Content-Type': 'application/json'
-        }
+        response = requests.post(f"{self.BASE_URL}/api/v2/client/time-attendance/timesheets", headers=self.headers, json=data)
+        response.raise_for_status()
+        return response.json()
+    
+    def get_timesheets(self, employee_id: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> List[Dict[str, Any]]:
+        params = {}
+        if employee_id:
+            params['employee_id'] = employee_id
+        if start_date:
+            params['start_date'] = start_date
+        if end_date:
+            params['end_date'] = end_date
         
-        data = {
-            "employee_id": "123",
-            "date": "2025-11-28",
-            "start_time": "09:00",
-            "end_time": "17:00",
-            "notes": "Test today's timesheet"
-        }
-        
-        response = requests.post(f"{self.BASE_URL}/api/v2/client/time-attendance/timesheets", headers=headers, json=data)
+        response = requests.get(f"{self.BASE_URL}/api/v2/client/time-attendance/timesheets", headers=self.headers, params=params)
         response.raise_for_status()
         return response.json()
 
@@ -72,6 +73,19 @@ if __name__ == '__main__':
     client = UKGAPIClient()
     companies = client.list_companies()
     print(companies)
-    timesheet = client.create_timesheet()
-    print(timesheet)
 
+    # Create a timesheet for today
+    timesheet_data = {
+        "employee_id": "123",
+        "date": "2025-11-28",
+        "start_time": "09:00",
+        "end_time": "17:00",
+        "notes": "Test today's timesheet"
+    }
+    timesheet = client.create_timesheet(data=timesheet_data)
+
+    print("Get Timesheet:", timesheet)
+    # Fetch timesheet for today
+    timesheets = client.get_timesheets(employee_id="123", start_date="2025-11-28", end_date="2025-11-28")
+    print("Timesheet for 2025-11-28:", timesheets)
+    
