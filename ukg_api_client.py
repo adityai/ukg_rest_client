@@ -68,6 +68,11 @@ class UKGAPIClient:
         response = requests.get(f"{self.BASE_URL}/api/v2/client/time-attendance/timesheets", headers=self.headers, params=params)
         response.raise_for_status()
         return response.json()
+    
+    def create_vacation_request(self, data):
+        response = requests.post(f"{self.BASE_URL}/api/v2/client/time-off/requests", headers=self.headers, json=data)
+        response.raise_for_status()
+        return response.json()
 
 if __name__ == '__main__':
     client = UKGAPIClient()
@@ -88,4 +93,17 @@ if __name__ == '__main__':
     # Fetch timesheet for today
     timesheets = client.get_timesheets(employee_id="123", start_date="2025-11-28", end_date="2025-11-28")
     print("Timesheet for 2025-11-28:", timesheets)
+
+    # Create a vacation request
+    vacation_request_data = {
+        "employee_id": "123",
+        "start_date": "2025-12-01",
+        "end_date": "2025-12-05",
+        "reason": "Vacation",
+        "notes": "Going on vacation"
+    }
+    vacation_request = client.create_vacation_request(data=vacation_request_data)
+    print("Vacation Request:", vacation_request)
+
     
+
