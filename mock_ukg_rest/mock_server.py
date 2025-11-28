@@ -309,11 +309,29 @@ def timesheets():
     
     if request.method == 'GET':
         data = list(mock_data['timesheets'].values())
+        # Add sample timesheet if none exist
+        if not data:
+            sample_timesheet = {
+                'id': generate_id(),
+                'employee_id': 'EMP001',
+                'week_ending': '2024-02-02',
+                'total_hours': 40.0,
+                'regular_hours': 39.5,
+                'overtime_hours': 0.5,
+                'status': 'submitted',
+                'entries': [
+                    {'date': '2024-01-29', 'hours': 8.0, 'project': 'Development'},
+                    {'date': '2024-01-30', 'hours': 8.5, 'project': 'Testing'}
+                ]
+            }
+            mock_data['timesheets'][sample_timesheet['id']] = sample_timesheet
+            data = [sample_timesheet]
         return jsonify(create_paginated_response(data))
     
     elif request.method == 'POST':
         timesheet = request.json
         timesheet['id'] = generate_id()
+        timesheet['status'] = 'draft'
         timesheet['created_at'] = datetime.now().isoformat()
         mock_data['timesheets'][timesheet['id']] = timesheet
         return jsonify(timesheet), 201
@@ -341,6 +359,33 @@ def attendance_records():
         return jsonify({'error': 'Unauthorized'}), 401
     
     data = list(mock_data['attendance_records'].values())
+    # Add sample attendance records if none exist
+    if not data:
+        sample_records = [
+            {
+                'id': generate_id(),
+                'employee_id': 'EMP001',
+                'date': '2024-01-29',
+                'clock_in': '09:00:00',
+                'clock_out': '17:30:00',
+                'break_minutes': 60,
+                'total_hours': 7.5,
+                'status': 'present'
+            },
+            {
+                'id': generate_id(),
+                'employee_id': 'EMP001', 
+                'date': '2024-01-30',
+                'clock_in': '08:45:00',
+                'clock_out': '17:15:00',
+                'break_minutes': 45,
+                'total_hours': 7.75,
+                'status': 'present'
+            }
+        ]
+        for record in sample_records:
+            mock_data['attendance_records'][record['id']] = record
+        data = sample_records
     return jsonify(create_paginated_response(data))
 
 # Payroll Endpoints
