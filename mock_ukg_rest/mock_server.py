@@ -309,11 +309,29 @@ def timesheets():
     
     if request.method == 'GET':
         data = list(mock_data['timesheets'].values())
+        # Add sample timesheet if none exist
+        if not data:
+            sample_timesheet = {
+                'id': generate_id(),
+                'employee_id': 'EMP001',
+                'week_ending': '2024-02-02',
+                'total_hours': 40.0,
+                'regular_hours': 39.5,
+                'overtime_hours': 0.5,
+                'status': 'submitted',
+                'entries': [
+                    {'date': '2024-01-29', 'hours': 8.0, 'project': 'Development'},
+                    {'date': '2024-01-30', 'hours': 8.5, 'project': 'Testing'}
+                ]
+            }
+            mock_data['timesheets'][sample_timesheet['id']] = sample_timesheet
+            data = [sample_timesheet]
         return jsonify(create_paginated_response(data))
     
     elif request.method == 'POST':
         timesheet = request.json
         timesheet['id'] = generate_id()
+        timesheet['status'] = 'draft'
         timesheet['created_at'] = datetime.now().isoformat()
         mock_data['timesheets'][timesheet['id']] = timesheet
         return jsonify(timesheet), 201
@@ -341,6 +359,33 @@ def attendance_records():
         return jsonify({'error': 'Unauthorized'}), 401
     
     data = list(mock_data['attendance_records'].values())
+    # Add sample attendance records if none exist
+    if not data:
+        sample_records = [
+            {
+                'id': generate_id(),
+                'employee_id': 'EMP001',
+                'date': '2024-01-29',
+                'clock_in': '09:00:00',
+                'clock_out': '17:30:00',
+                'break_minutes': 60,
+                'total_hours': 7.5,
+                'status': 'present'
+            },
+            {
+                'id': generate_id(),
+                'employee_id': 'EMP001', 
+                'date': '2024-01-30',
+                'clock_in': '08:45:00',
+                'clock_out': '17:15:00',
+                'break_minutes': 45,
+                'total_hours': 7.75,
+                'status': 'present'
+            }
+        ]
+        for record in sample_records:
+            mock_data['attendance_records'][record['id']] = record
+        data = sample_records
     return jsonify(create_paginated_response(data))
 
 # Payroll Endpoints
@@ -715,6 +760,102 @@ def org_hierarchy():
         ]
     }
     return jsonify(hierarchy)
+
+# ==================== UKG PRO API ENDPOINTS ====================
+
+# Personnel Information
+@app.route('/personnel/v1/employees', methods=['GET'])
+def pro_employees():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = [{
+        'employeeId': 'EMP001',
+        'firstName': 'John',
+        'lastName': 'Doe',
+        'status': 'Active'
+    }]
+    return jsonify(data)
+
+@app.route('/personnel/v1/employees/<employee_id>', methods=['GET'])
+def pro_employee(employee_id):
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    return jsonify({
+        'employeeId': employee_id,
+        'firstName': 'John',
+        'lastName': 'Doe',
+        'status': 'Active',
+        'hireDate': '2023-01-15'
+    })
+
+# Time Management
+@app.route('/timemanagement/v1/timecards', methods=['GET', 'POST'])
+def pro_timecards():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    if request.method == 'GET':
+        return jsonify([{
+            'employeeId': 'EMP001',
+            'payPeriod': '2024-01-01/2024-01-14',
+            'totalHours': 80.0
+        }])
+    
+    return jsonify({'success': True}), 201
+
+# Payroll
+@app.route('/payroll/v1/paychecks', methods=['GET'])
+def pro_paychecks():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    return jsonify([{
+        'employeeId': 'EMP001',
+        'payDate': '2024-01-15',
+        'grossPay': 5000.00,
+        'netPay': 3800.00
+    }])
+
+# Benefits
+@app.route('/benefits/v1/enrollments', methods=['GET'])
+def pro_enrollments():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    return jsonify([{
+        'employeeId': 'EMP001',
+        'planId': 'HEALTH001',
+        'planName': 'Health Insurance',
+        'status': 'Active'
+    }])
+
+# Recruiting
+@app.route('/recruiting/v1/jobs', methods=['GET'])
+def pro_jobs():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    return jsonify([{
+        'jobId': 'JOB001',
+        'title': 'Software Engineer',
+        'status': 'Open',
+        'department': 'Engineering'
+    }])
+
+# Performance Management
+@app.route('/performance/v1/reviews', methods=['GET'])
+def pro_reviews():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    return jsonify([{
+        'reviewId': 'REV001',
+        'employeeId': 'EMP001',
+        'reviewPeriod': '2024',
+        'status': 'In Progress'
+    }])
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
