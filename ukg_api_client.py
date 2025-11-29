@@ -92,8 +92,30 @@ class UKGAPIClient:
         params = {}
         if employee_id:
             params['employee_id'] = employee_id
-        
         response = requests.get(f"{self.BASE_URL}/api/v2/client/time-off/requests", headers=self.headers, params=params)
+        response.raise_for_status()
+        return response.json()
+    
+    def get_payroll_runs(self):
+        response = requests.get(f"{self.BASE_URL}/api/v2/client/payroll/runs", headers=self.headers)
+        response.raise_for_status()
+        return response.json()
+    
+    def create_payroll_runs(self, payroll_run_data):
+        response = requests.post(f"{self.BASE_URL}/api/v2/client/payroll/runs", headers=self.headers, json=payroll_run_data)
+        response.raise_for_status()
+        return response.json()
+    
+    def create_pay_stubs(self, pay_stub_data):
+        response = requests.post(f"{self.BASE_URL}/api/v2/client/payroll/pay-stubs", headers=self.headers, json=pay_stub_data)
+        response.raise_for_status()
+        return response.json()
+    
+    def get_pay_stubs(self, employee_id):
+        params = {}
+        if employee_id:
+            params['employee_id'] = employee_id
+        response = requests.get(f"{self.BASE_URL}/api/v2/client/payroll/pay-stubs", headers=self.headers, params=params)
         response.raise_for_status()
         return response.json()
 
@@ -139,3 +161,32 @@ if __name__ == '__main__':
     # Approve vacation request
     approved_vacation_request = client.approve_vacation_request(request_id=vacation_request['id'], approver_id="manager_4567")
     print("Approved Vacation Request:", approved_vacation_request)
+
+    # Create payroll run
+    payroll_run_data = {
+        "payroll_period_start": "2025-11-01",
+        "payroll_period_end": "2025-11-15",
+        "employees": ["123", "456"]
+    }
+    payroll_run = client.create_payroll_runs(payroll_run_data=payroll_run_data)
+    print("Created Payroll Run:", payroll_run)
+
+    # Get payroll runs
+    payroll_runs = client.get_payroll_runs()
+    print("Payroll Runs:", payroll_runs)
+
+    # Create pay stubs
+    pay_stub_data = {
+        "employee_id": "123",
+        "pay_period_start": "2025-11-01",
+        "pay_period_end": "2025-11-15",
+        "gross_pay": 2000,
+        "net_pay": 1500,
+        "deductions": 500
+    }
+    pay_stub = client.create_pay_stubs(pay_stub_data=pay_stub_data)
+    print("Created Pay Stub:", pay_stub)
+
+    # Get pay stubs
+    pay_stubs = client.get_pay_stubs(employee_id="123")
+    print("Pay Stubs:", pay_stubs)
