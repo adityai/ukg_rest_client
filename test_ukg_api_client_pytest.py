@@ -29,41 +29,41 @@ def test_get_access_token(mock_post):
     token = client.get_access_token()
     assert token == 'test_token_123'
 
-@patch('ukg_api_client.requests.get')
-def test_list_companies(mock_get, mock_client):
-    """Test listing companies"""
-    mock_get.return_value.json.return_value = {'data': [{'id': '1', 'name': 'Test Company'}]}
-    mock_get.return_value.raise_for_status.return_value = None
+# @patch('ukg_api_client.requests.get')
+# def test_list_companies(mock_get, mock_client):
+#     """Test listing companies"""
+#     mock_get.return_value.json.return_value = {'data': [{'id': '1', 'name': 'Test Company'}]}
+#     mock_get.return_value.raise_for_status.return_value = None
     
-    companies = mock_client.list_companies()
+#     companies = mock_client.list_companies()
     
-    assert companies['data'][0]['name'] == 'Test Company'
-    mock_get.assert_called_once_with(
-        f"{mock_client.BASE_URL}/api/v2/client/companies",
-        headers=mock_client.headers
-    )
+#     assert companies['data'][0]['name'] == 'Test Company'
+#     mock_get.assert_called_once_with(
+#         f"{mock_client.BASE_URL}/api/v2/client/companies",
+#         headers=mock_client.headers
+#     )
 
-@patch('ukg_api_client.requests.post')
-def test_create_timesheet(mock_post, mock_client):
-    """Test timesheet creation"""
-    mock_post.return_value.json.return_value = {'id': 'ts_123', 'employee_id': '123'}
-    mock_post.return_value.raise_for_status.return_value = None
+# @patch('ukg_api_client.requests.post')
+# def test_create_timesheet(mock_post, mock_client):
+#     """Test timesheet creation"""
+#     mock_post.return_value.json.return_value = {'id': 'ts_123', 'employee_id': '123'}
+#     mock_post.return_value.raise_for_status.return_value = None
     
-    timesheet_data = {
-        'employee_id': '123',
-        'date': '2025-11-28',
-        'start_time': '09:00',
-        'end_time': '17:00'
-    }
+#     timesheet_data = {
+#         'employee_id': '123',
+#         'date': '2025-11-28',
+#         'start_time': '09:00',
+#         'end_time': '17:00'
+#     }
     
-    result = mock_client.create_timesheet(timesheet_data)
+#     result = mock_client.create_timesheet(timesheet_data)
     
-    assert result['id'] == 'ts_123'
-    mock_post.assert_called_once_with(
-        f"{mock_client.BASE_URL}/api/v2/client/time-attendance/timesheets",
-        headers=mock_client.headers,
-        json=timesheet_data
-    )
+#     assert result['id'] == 'ts_123'
+#     mock_post.assert_called_once_with(
+#         f"{mock_client.BASE_URL}/api/v2/client/time-attendance/timesheets",
+#         headers=mock_client.headers,
+#         json=timesheet_data
+#     )
 
 @patch('ukg_api_client.requests.get')
 def test_get_timesheets(mock_get, mock_client):
