@@ -200,6 +200,152 @@ class MockDataLoader:
             if response.status_code == 201:
                 print(f"✓ Created timesheet for employee: {timesheet['employee_id']}")
         
+        # Create sample payroll runs
+        payroll_runs = [
+            {
+                'company_id': company_ids[0] if company_ids else 'default',
+                'pay_period_start': '2024-01-01',
+                'pay_period_end': '2024-01-15',
+                'pay_date': '2024-01-20',
+                'status': 'completed',
+                'total_employees': 150,
+                'total_gross_pay': 375000.00,
+                'total_net_pay': 285000.00,
+                'run_type': 'regular'
+            },
+            {
+                'company_id': company_ids[0] if company_ids else 'default',
+                'pay_period_start': '2024-01-16',
+                'pay_period_end': '2024-01-31',
+                'pay_date': '2024-02-05',
+                'status': 'processing',
+                'total_employees': 152,
+                'total_gross_pay': 380000.00,
+                'total_net_pay': 288000.00,
+                'run_type': 'regular'
+            }
+        ]
+        
+        payroll_run_ids = []
+        for payroll_run in payroll_runs:
+            try:
+                response = requests.post(
+                    f'{self.base_url}/api/v2/client/payroll/runs',
+                    headers=self.get_headers(),
+                    json=payroll_run
+                )
+                if response.status_code == 201:
+                    payroll_run_ids.append(response.json()['id'])
+                    print(f"✓ Created payroll run: {payroll_run['pay_period_start']} to {payroll_run['pay_period_end']}")
+            except:
+                print(f"⚠ Payroll run endpoint not available, skipping")
+        
+        # Create sample pay stubs
+        pay_stubs = [
+            {
+                'employee_id': employee_ids[0] if employee_ids else 'EMP001',
+                'payroll_run_id': payroll_run_ids[0] if payroll_run_ids else 'PR001',
+                'pay_date': '2024-01-20',
+                'gross_pay': 2500.00,
+                'net_pay': 1900.00,
+                'regular_hours': 80.0,
+                'overtime_hours': 0.0
+            },
+            {
+                'employee_id': employee_ids[1] if len(employee_ids) > 1 else 'EMP002',
+                'payroll_run_id': payroll_run_ids[0] if payroll_run_ids else 'PR001',
+                'pay_date': '2024-01-20',
+                'gross_pay': 3000.00,
+                'net_pay': 2280.00,
+                'regular_hours': 80.0,
+                'overtime_hours': 4.0
+            }
+        ]
+        
+        # Create sample earnings
+        earnings = [
+            {
+                'employee_id': employee_ids[0] if employee_ids else 'EMP001',
+                'payroll_run_id': payroll_run_ids[0] if payroll_run_ids else 'PR001',
+                'earning_type': 'Regular Pay',
+                'amount': 2400.00,
+                'hours': 80.0,
+                'rate': 30.00
+            },
+            {
+                'employee_id': employee_ids[0] if employee_ids else 'EMP001',
+                'payroll_run_id': payroll_run_ids[0] if payroll_run_ids else 'PR001',
+                'earning_type': 'Bonus',
+                'amount': 100.00,
+                'hours': 0.0,
+                'rate': 0.00
+            }
+        ]
+        
+        # Create sample deductions
+        deductions = [
+            {
+                'employee_id': employee_ids[0] if employee_ids else 'EMP001',
+                'payroll_run_id': payroll_run_ids[0] if payroll_run_ids else 'PR001',
+                'deduction_type': 'Health Insurance',
+                'amount': 150.00,
+                'pre_tax': True
+            },
+            {
+                'employee_id': employee_ids[0] if employee_ids else 'EMP001',
+                'payroll_run_id': payroll_run_ids[0] if payroll_run_ids else 'PR001',
+                'deduction_type': '401k',
+                'amount': 200.00,
+                'pre_tax': True
+            }
+        ]
+        
+        # Create sample taxes
+        taxes = [
+            {
+                'employee_id': employee_ids[0] if employee_ids else 'EMP001',
+                'payroll_run_id': payroll_run_ids[0] if payroll_run_ids else 'PR001',
+                'tax_type': 'Federal Income Tax',
+                'amount': 180.00,
+                'taxable_wages': 2250.00
+            },
+            {
+                'employee_id': employee_ids[0] if employee_ids else 'EMP001',
+                'payroll_run_id': payroll_run_ids[0] if payroll_run_ids else 'PR001',
+                'tax_type': 'Social Security',
+                'amount': 139.50,
+                'taxable_wages': 2250.00
+            },
+            {
+                'employee_id': employee_ids[0] if employee_ids else 'EMP001',
+                'payroll_run_id': payroll_run_ids[0] if payroll_run_ids else 'PR001',
+                'tax_type': 'Medicare',
+                'amount': 32.63,
+                'taxable_wages': 2250.00
+            }
+        ]
+        
+        # Load payroll data
+        payroll_endpoints = [
+            ('pay-stubs', pay_stubs),
+            ('earnings', earnings),
+            ('deductions', deductions),
+            ('taxes', taxes)
+        ]
+        
+        for endpoint, data_list in payroll_endpoints:
+            for item in data_list:
+                try:
+                    response = requests.post(
+                        f'{self.base_url}/api/v2/client/payroll/{endpoint}',
+                        headers=self.get_headers(),
+                        json=item
+                    )
+                    if response.status_code == 201:
+                        print(f"✓ Created {endpoint.replace('-', ' ')}: {item.get('employee_id', 'N/A')}")
+                except:
+                    print(f"⚠ {endpoint} endpoint not available, skipping")
+        
         # Create sample webhooks
         webhooks = [
             {
@@ -227,6 +373,16 @@ class MockDataLoader:
         
         print("\n✅ Sample data loading completed successfully!")
         print(f"Mock server is running at: {self.base_url}")
+        print("Sample data includes:")
+        print(f"  • {len(companies)} companies")
+        print(f"  • {len(employees)} employees")
+        print(f"  • {len(timesheets)} timesheets")
+        print(f"  • {len(time_off_requests)} time-off requests")
+        print(f"  • {len(payroll_runs)} payroll runs")
+        print(f"  • {len(pay_stubs)} pay stubs")
+        print(f"  • {len(earnings)} earnings records")
+        print(f"  • {len(deductions)} deductions")
+        print(f"  • {len(taxes)} tax records")
         print("You can now test your UKG API client against this mock server.")
 
 if __name__ == '__main__':
