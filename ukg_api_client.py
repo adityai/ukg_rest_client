@@ -5,17 +5,18 @@ from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
 from urllib.parse import urlencode
 import logging
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 class UKGAPIClient:
-    BASE_URL = 'http://localhost:8080'  # Mock server URL
-    APP_ID = 'test_app'
-    APP_SECRET = 'test_secret'
-    CLIENT_ID = 'test_client'
+    BASE_URL = os.getenv('UKG_BASE_URL', 'https://api.ultipro.com')  # Base URL for UKG API
+    APP_ID = os.getenv('UKG_APP_ID')  # Your actual application ID
+    APP_SECRET = os.getenv('UKG_APP_SECRET')  # Your actual application secret
+    CLIENT_ID = os.getenv('UKG_CLIENT_ID')  # Your actual client ID
+    COMPANY_SHORT_NAME = os.getenv('UKG_COMPANY_SHORT_NAME')  # Your company identifier
 
     def __init__(self):
         token = self.get_access_token()
@@ -24,7 +25,6 @@ class UKGAPIClient:
             'Authorization': f'Bearer {token}',
             'Content-Type': 'application/json'
         }
-
 
     def get_access_token(self):
         auth_url = f"{self.BASE_URL}/api/v2/client/tokens"
@@ -44,17 +44,18 @@ class UKGAPIClient:
         response = requests.post(auth_url, headers=headers, data=data)
         response.raise_for_status()
         return response.json()['access_token']
+    
+    def make_request(self, method, endpoint, params = None, data = None):
+        url = f"{self.BASE_URL}/api/v2/client/{endpoint}"
+        response = requests.request(method, url, headers=self.headers, params=params, json=data)
+        response.raise_for_status()
+        return response.json()
 
     def list_companies(self):        
-        response = requests.get(f"{self.BASE_URL}/api/v2/client/companies", headers=self.headers)
-        response.raise_for_status()
-        return response.json()
+        return self.make_request("GET", "companies")
     
     def create_timesheet(self, data):
-        
-        response = requests.post(f"{self.BASE_URL}/api/v2/client/time-attendance/timesheets", headers=self.headers, json=data)
-        response.raise_for_status()
-        return response.json()
+        return self.make_request("POST", "time-attendance/timesheets", data=data)
     
     def get_timesheets(self, employee_id: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> List[Dict[str, Any]]:
         params = {}
@@ -92,8 +93,30 @@ class UKGAPIClient:
         params = {}
         if employee_id:
             params['employee_id'] = employee_id
-        
         response = requests.get(f"{self.BASE_URL}/api/v2/client/time-off/requests", headers=self.headers, params=params)
+        response.raise_for_status()
+        return response.json()
+    
+    def get_payroll_runs(self):
+        response = requests.get(f"{self.BASE_URL}/api/v2/client/payroll/runs", headers=self.headers)
+        response.raise_for_status()
+        return response.json()
+    
+    def create_payroll_runs(self, payroll_run_data):
+        response = requests.post(f"{self.BASE_URL}/api/v2/client/payroll/runs", headers=self.headers, json=payroll_run_data)
+        response.raise_for_status()
+        return response.json()
+    
+    def create_pay_stubs(self, pay_stub_data):
+        response = requests.post(f"{self.BASE_URL}/api/v2/client/payroll/pay-stubs", headers=self.headers, json=pay_stub_data)
+        response.raise_for_status()
+        return response.json()
+    
+    def get_pay_stubs(self, employee_id):
+        params = {}
+        if employee_id:
+            params['employee_id'] = employee_id
+        response = requests.get(f"{self.BASE_URL}/api/v2/client/payroll/pay-stubs", headers=self.headers, params=params)
         response.raise_for_status()
         return response.json()
 
@@ -139,3 +162,32 @@ if __name__ == '__main__':
     # Approve vacation request
     approved_vacation_request = client.approve_vacation_request(request_id=vacation_request['id'], approver_id="manager_4567")
     print("Approved Vacation Request:", approved_vacation_request)
+
+    # Create payroll run
+    payroll_run_data = {
+        "payroll_period_start": "2025-11-01",
+        "payroll_period_end": "2025-11-15",
+        "employees": ["123", "456"]
+    }
+    payroll_run = client.create_payroll_runs(payroll_run_data=payroll_run_data)
+    print("Created Payroll Run:", payroll_run)
+
+    # Get payroll runs
+    payroll_runs = client.get_payroll_runs()
+    print("Payroll Runs:", payroll_runs)
+
+    # Create pay stubs
+    pay_stub_data = {
+        "employee_id": "123",
+        "pay_period_start": "2025-11-01",
+        "pay_period_end": "2025-11-15",
+        "gross_pay": 2000,
+        "net_pay": 1500,
+        "deductions": 500
+    }
+    pay_stub = client.create_pay_stubs(pay_stub_data=pay_stub_data)
+    print("Created Pay Stub:", pay_stub)
+
+    # Get pay stubs
+    pay_stubs = client.get_pay_stubs(employee_id="123")
+    print("Pay Stubs:", pay_stubs)
