@@ -78,6 +78,24 @@ class UKGAPIClient:
         response = requests.get(f"{self.BASE_URL}/api/v2/client/time-off/requests/{request_id}", headers=self.headers)
         response.raise_for_status()
         return response.json()
+    
+    def approve_vacation_request(self, request_id, approver_id):
+        data = {
+            "approver_id": approver_id,
+            "status": "approved"
+        }
+        response = requests.put(f"{self.BASE_URL}/api/v2/client/time-off/requests/{request_id}", headers=self.headers, json=data)
+        response.raise_for_status()
+        return response.json()
+    
+    def get_vacation_requests(self, employee_id):
+        params = {}
+        if employee_id:
+            params['employee_id'] = employee_id
+        
+        response = requests.get(f"{self.BASE_URL}/api/v2/client/time-off/requests", headers=self.headers, params=params)
+        response.raise_for_status()
+        return response.json()
 
 if __name__ == '__main__':
     client = UKGAPIClient()
@@ -110,7 +128,14 @@ if __name__ == '__main__':
     vacation_request = client.create_vacation_request(data=vacation_request_data)
     print("Vacation Request:", vacation_request)
 
+    # Get vacation request by ID
     vacation_request_by_id = client.get_vacation_request_by_id(request_id=vacation_request['id'])
     print("Vacation Request by ID:", vacation_request_by_id)
 
+    # Get all vacation requests
+    all_vacation_requests = client.get_vacation_requests(employee_id="123")
+    print("All Vacation Requests:", all_vacation_requests)
 
+    # Approve vacation request
+    approved_vacation_request = client.approve_vacation_request(request_id=vacation_request['id'], approver_id="manager_4567")
+    print("Approved Vacation Request:", approved_vacation_request)
