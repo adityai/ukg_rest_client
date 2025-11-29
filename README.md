@@ -1,5 +1,7 @@
 # UKG Rest Client
 
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/adityai/ukg_rest_client/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/adityai/ukg_rest_client/tree/main)
+
 ## Developer's disclosure
 
 I need to demonstrate my skills as a software developer with skills for software integration by consuming external web services, specifically the ones hosted by Ultimate Kronos Group (UKG). UKG is a provider of cloud based workforce management software. UKG's developer portal and the web services are accessible only to customers. So, I asked Amazon Q to generate mock web services based on the API specification that is publicly available at https://doc.people-doc.com/client/api/index-v2.html. 
