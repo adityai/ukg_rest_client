@@ -27,26 +27,6 @@ jobs:
           command: |
             pip install build twine
       - run:
-          name: Create package structure
-          command: |
-            mkdir -p dist
-            cp ukg_api_client.py dist/
-      - run:
-          name: Create setup.py
-          command: |
-            cat > setup.py << EOF
-            from setuptools import setup, find_packages
-            
-            setup(
-                name="ukg-api-client",
-                version="1.0.0",
-                description="UKG API Client for workforce management",
-                py_modules=["ukg_api_client"],
-                install_requires=["requests"],
-                python_requires=">=3.7",
-            )
-            EOF
-      - run:
           name: Build package
           command: |
             python -m build
