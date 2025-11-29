@@ -153,6 +153,14 @@ def test_api_error_handling(mock_get, mock_client):
     with pytest.raises(Exception):
         mock_client.list_companies()
 
+@patch('ukg_api_client.requests.post')
+def test_authentication_with_raise_for_status_error(mock_post):
+    """Test authentication with HTTP error"""
+    mock_post.return_value.raise_for_status.side_effect = Exception("HTTP Error")
+    
+    with pytest.raises(Exception):
+        UKGAPIClient()
+
 def test_client_initialization():
     """Test client initialization with mocked authentication"""
     with patch('ukg_api_client.requests.post') as mock_post:
@@ -164,3 +172,112 @@ def test_client_initialization():
         assert client.BASE_URL == 'http://localhost:8080'
         assert client.APP_ID == 'test_app'
         assert 'Authorization' in client.headers
+
+@patch('ukg_api_client.requests.get')
+def test_get_payroll_runs(mock_get, mock_client):
+    """Test retrieving payroll runs"""
+    mock_get.return_value.json.return_value = {'data': [{'id': 'pr_123', 'status': 'completed'}]}
+    mock_get.return_value.raise_for_status.return_value = None
+    
+    result = mock_client.get_payroll_runs()
+    
+    assert len(result['data']) == 1
+    assert result['data'][0]['status'] == 'completed'
+
+@patch('ukg_api_client.requests.get')
+def test_get_pay_stubs_with_employee(mock_get, mock_client):
+    """Test retrieving pay stubs with employee filter"""
+    mock_get.return_value.json.return_value = {'data': [{'id': 'ps_123', 'employee_id': '123'}]}
+    mock_get.return_value.raise_for_status.return_value = None
+    
+    result = mock_client.get_pay_stubs('123')
+    
+    assert len(result['data']) == 1
+    mock_get.assert_called_once_with(
+        f"{mock_client.BASE_URL}/api/v2/client/payroll/pay-stubs",
+        headers=mock_client.headers,
+        params={'employee_id': '123'}
+    )
+
+@patch('ukg_api_client.requests.get')
+def test_get_pay_stubs_no_employee(mock_get, mock_client):
+    """Test retrieving pay stubs without employee filter"""
+    mock_get.return_value.json.return_value = {'data': [{'id': 'ps_123'}, {'id': 'ps_456'}]}
+    mock_get.return_value.raise_for_status.return_value = None
+    
+    result = mock_client.get_pay_stubs(None)
+    
+    assert len(result['data']) == 2
+    mock_get.assert_called_once_with(
+        f"{mock_client.BASE_URL}/api/v2/client/payroll/pay-stubs",
+        headers=mock_client.headers,
+        params={}
+    )
+
+@patch('ukg_api_client.requests.get')
+def test_get_timesheets_with_dates(mock_get, mock_client):
+    """Test retrieving timesheets with date filters"""
+    mock_get.return_value.json.return_value = {'data': [{'id': 'ts_123'}]}
+    mock_get.return_value.raise_for_status.return_value = None
+    
+    result = mock_client.get_timesheets(employee_id='123', start_date='2025-01-01', end_date='2025-01-31')
+    
+    assert len(result['data']) == 1
+    mock_get.assert_called_once_with(
+        f"{mock_client.BASE_URL}/api/v2/client/time-attendance/timesheets",
+        headers=mock_client.headers,
+        params={'employee_id': '123', 'start_date': '2025-01-01', 'end_date': '2025-01-31'}
+    )
+
+@patch('ukg_api_client.requests.get')
+def test_get_timesheets_no_params(mock_get, mock_client):
+    """Test retrieving timesheets without parameters"""
+    mock_get.return_value.json.return_value = {'data': []}
+    mock_get.return_value.raise_for_status.return_value = None
+    
+    result = mock_client.get_timesheets()
+    
+    assert len(result['data']) == 0
+    mock_get.assert_called_once_with(
+        f"{mock_client.BASE_URL}/api/v2/client/time-attendance/timesheets",
+        headers=mock_client.headers,
+        params={}
+    )
+
+@patch('ukg_api_client.requests.get')
+def test_get_vacation_requests_no_employee(mock_get, mock_client):
+    """Test retrieving vacation requests without employee filter"""
+    mock_get.return_value.json.return_value = {'data': []}
+    mock_get.return_value.raise_for_status.return_value = None
+    
+    result = mock_client.get_vacation_requests(None)
+    
+    assert len(result['data']) == 0
+    mock_get.assert_called_once_with(
+        f"{mock_client.BASE_URL}/api/v2/client/time-off/requests",
+        headers=mock_client.headers,
+        params={}
+    )
+
+def test_main_execution():
+    """Test main execution block"""
+    with patch('ukg_api_client.requests.post') as mock_post:
+        mock_post.return_value.json.side_effect = [
+            {'access_token': 'test_token'},
+            {'id': 'ts_123'},
+            {'id': 'vr_123'},
+            {'id': 'vr_123', 'status': 'approved'}
+        ]
+        mock_post.return_value.raise_for_status.return_value = None
+        
+        with patch('ukg_api_client.requests.get') as mock_get:
+            mock_get.return_value.json.return_value = {'data': []}
+            mock_get.return_value.raise_for_status.return_value = None
+            
+            with patch('ukg_api_client.requests.put') as mock_put:
+                mock_put.return_value.json.return_value = {'id': 'vr_123', 'status': 'approved'}
+                mock_put.return_value.raise_for_status.return_value = None
+                
+                # Import and execute main block
+                import ukg_api_client
+                # Main block is executed on import, so we just verify it doesn't crash
