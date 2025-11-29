@@ -1,6 +1,6 @@
 # UKG Rest Client
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/adityai/ukg_rest_client.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/adityai/ukg_rest_client)
+[![CircleCI](https://circleci.com/gh/adityai/ukg_rest_client.svg?style=svg)](https://circleci.com/gh/adityai/ukg_rest_client)
 
 ## Developer's disclosure
 
