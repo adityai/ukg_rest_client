@@ -44,17 +44,18 @@ class UKGAPIClient:
         response = requests.post(auth_url, headers=headers, data=data)
         response.raise_for_status()
         return response.json()['access_token']
+    
+    def make_request(self, method, endpoint, params = None, data = None):
+        url = f"{self.BASE_URL}/api/v2/client/{endpoint}"
+        response = requests.request(method, url, headers=self.headers, params=params, json=data)
+        response.raise_for_status()
+        return response.json()
 
     def list_companies(self):        
-        response = requests.get(f"{self.BASE_URL}/api/v2/client/companies", headers=self.headers)
-        response.raise_for_status()
-        return response.json()
+        return self.make_request("GET", "companies")
     
     def create_timesheet(self, data):
-        
-        response = requests.post(f"{self.BASE_URL}/api/v2/client/time-attendance/timesheets", headers=self.headers, json=data)
-        response.raise_for_status()
-        return response.json()
+        return self.make_request("POST", "time-attendance/timesheets", data=data)
     
     def get_timesheets(self, employee_id: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> List[Dict[str, Any]]:
         params = {}
