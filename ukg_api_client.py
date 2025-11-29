@@ -5,17 +5,18 @@ from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
 from urllib.parse import urlencode
 import logging
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 class UKGAPIClient:
-    BASE_URL = 'http://localhost:8080'  # Mock server URL
-    APP_ID = 'test_app'
-    APP_SECRET = 'test_secret'
-    CLIENT_ID = 'test_client'
+    BASE_URL = os.getenv('UKG_BASE_URL', 'https://api.ultipro.com')  # Base URL for UKG API
+    APP_ID = os.getenv('UKG_APP_ID')  # Your actual application ID
+    APP_SECRET = os.getenv('UKG_APP_SECRET')  # Your actual application secret
+    CLIENT_ID = os.getenv('UKG_CLIENT_ID')  # Your actual client ID
+    COMPANY_SHORT_NAME = os.getenv('UKG_COMPANY_SHORT_NAME')  # Your company identifier
 
     def __init__(self):
         token = self.get_access_token()
@@ -24,7 +25,6 @@ class UKGAPIClient:
             'Authorization': f'Bearer {token}',
             'Content-Type': 'application/json'
         }
-
 
     def get_access_token(self):
         auth_url = f"{self.BASE_URL}/api/v2/client/tokens"
