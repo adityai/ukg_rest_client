@@ -389,13 +389,21 @@ def attendance_records():
     return jsonify(create_paginated_response(data))
 
 # Payroll Endpoints
-@app.route('/api/v2/client/payroll/runs', methods=['GET'])
+@app.route('/api/v2/client/payroll/runs', methods=['GET', 'POST'])
 def payroll_runs():
     if not require_auth():
         return jsonify({'error': 'Unauthorized'}), 401
     
-    data = list(mock_data['payroll_runs'].values())
-    return jsonify(create_paginated_response(data))
+    if request.method == 'GET':
+        data = list(mock_data['payroll_runs'].values())
+        return jsonify(create_paginated_response(data))
+    
+    elif request.method == 'POST':
+        payroll_run = request.json
+        payroll_run['id'] = generate_id()
+        payroll_run['created_at'] = datetime.now().isoformat()
+        mock_data['payroll_runs'][payroll_run['id']] = payroll_run
+        return jsonify(payroll_run), 201
 
 @app.route('/api/v2/client/payroll/runs/<run_id>', methods=['GET'])
 def payroll_run(run_id):
@@ -407,13 +415,21 @@ def payroll_run(run_id):
     
     return jsonify(mock_data['payroll_runs'][run_id])
 
-@app.route('/api/v2/client/payroll/pay-stubs', methods=['GET'])
+@app.route('/api/v2/client/payroll/pay-stubs', methods=['GET', 'POST'])
 def pay_stubs():
     if not require_auth():
         return jsonify({'error': 'Unauthorized'}), 401
     
-    data = list(mock_data['pay_stubs'].values())
-    return jsonify(create_paginated_response(data))
+    if request.method == 'GET':
+        data = list(mock_data['pay_stubs'].values())
+        return jsonify(create_paginated_response(data))
+    
+    elif request.method == 'POST':
+        pay_stub = request.json
+        pay_stub['id'] = generate_id()
+        pay_stub['created_at'] = datetime.now().isoformat()
+        mock_data['pay_stubs'][pay_stub['id']] = pay_stub
+        return jsonify(pay_stub), 201
 
 @app.route('/api/v2/client/payroll/pay-stubs/<stub_id>', methods=['GET'])
 def pay_stub(stub_id):
@@ -425,29 +441,53 @@ def pay_stub(stub_id):
     
     return jsonify(mock_data['pay_stubs'][stub_id])
 
-@app.route('/api/v2/client/payroll/earnings', methods=['GET'])
+@app.route('/api/v2/client/payroll/earnings', methods=['GET', 'POST'])
 def earnings():
     if not require_auth():
         return jsonify({'error': 'Unauthorized'}), 401
     
-    data = list(mock_data['earnings'].values())
-    return jsonify(create_paginated_response(data))
+    if request.method == 'GET':
+        data = list(mock_data['earnings'].values())
+        return jsonify(create_paginated_response(data))
+    
+    elif request.method == 'POST':
+        earning = request.json
+        earning['id'] = generate_id()
+        earning['created_at'] = datetime.now().isoformat()
+        mock_data['earnings'][earning['id']] = earning
+        return jsonify(earning), 201
 
-@app.route('/api/v2/client/payroll/deductions', methods=['GET'])
+@app.route('/api/v2/client/payroll/deductions', methods=['GET', 'POST'])
 def deductions():
     if not require_auth():
         return jsonify({'error': 'Unauthorized'}), 401
     
-    data = list(mock_data['deductions'].values())
-    return jsonify(create_paginated_response(data))
+    if request.method == 'GET':
+        data = list(mock_data['deductions'].values())
+        return jsonify(create_paginated_response(data))
+    
+    elif request.method == 'POST':
+        deduction = request.json
+        deduction['id'] = generate_id()
+        deduction['created_at'] = datetime.now().isoformat()
+        mock_data['deductions'][deduction['id']] = deduction
+        return jsonify(deduction), 201
 
-@app.route('/api/v2/client/payroll/taxes', methods=['GET'])
+@app.route('/api/v2/client/payroll/taxes', methods=['GET', 'POST'])
 def taxes():
     if not require_auth():
         return jsonify({'error': 'Unauthorized'}), 401
     
-    data = list(mock_data['taxes'].values())
-    return jsonify(create_paginated_response(data))
+    if request.method == 'GET':
+        data = list(mock_data['taxes'].values())
+        return jsonify(create_paginated_response(data))
+    
+    elif request.method == 'POST':
+        tax = request.json
+        tax['id'] = generate_id()
+        tax['created_at'] = datetime.now().isoformat()
+        mock_data['taxes'][tax['id']] = tax
+        return jsonify(tax), 201
 
 # Company/Configuration Endpoints
 @app.route('/api/v2/client/companies', methods=['GET', 'POST'])
