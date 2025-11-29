@@ -1,0 +1,63 @@
+version: 2.1
+
+jobs:
+  test:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            pip install pytest requests
+      - run:
+          name: Run unit tests
+          command: |
+            python -m pytest test_ukg_api_client_pytest.py -v
+      - store_test_results:
+          path: test-results
+
+  package:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+      - run:
+          name: Install build tools
+          command: |
+            pip install build twine
+      - run:
+          name: Create package structure
+          command: |
+            mkdir -p dist
+            cp ukg_api_client.py dist/
+      - run:
+          name: Create setup.py
+          command: |
+            cat > setup.py << EOF
+            from setuptools import setup, find_packages
+            
+            setup(
+                name="ukg-api-client",
+                version="1.0.0",
+                description="UKG API Client for workforce management",
+                py_modules=["ukg_api_client"],
+                install_requires=["requests"],
+                python_requires=">=3.7",
+            )
+            EOF
+      - run:
+          name: Build package
+          command: |
+            python -m build
+      - store_artifacts:
+          path: dist
+          destination: packages
+
+workflows:
+  test_and_package:
+    jobs:
+      - test
+      - package:
+          requires:
+            - test
