@@ -57,6 +57,40 @@ def get_member_entitlements(member_id):
     conn.close()
     return jsonify([dict(row) for row in entitlements])
 
+@app.route('/unions/<union_id>/compliance', methods=['GET'])
+def get_union_compliance(union_id):
+    conn = get_db_connection()
+    params = conn.execute('SELECT * FROM compliance_parameters WHERE union_id = ?', (union_id,)).fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in params])
+
+@app.route('/employees/<employee_id>/violations', methods=['GET'])
+def get_employee_violations(employee_id):
+    conn = get_db_connection()
+    query = '''
+        SELECT cv.*, cp.parameter_name, cp.description as param_description
+        FROM compliance_violations cv
+        JOIN compliance_parameters cp ON cv.parameter_id = cp.parameter_id
+        JOIN union_members um ON cv.member_id = um.member_id
+        WHERE um.employee_id = ?
+    '''
+    violations = conn.execute(query, (employee_id,)).fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in violations])
+
+@app.route('/members/<member_id>/violations', methods=['GET'])
+def get_member_violations(member_id):
+    conn = get_db_connection()
+    query = '''
+        SELECT cv.*, cp.parameter_name, cp.description as param_description
+        FROM compliance_violations cv
+        JOIN compliance_parameters cp ON cv.parameter_id = cp.parameter_id
+        WHERE cv.member_id = ?
+    '''
+    violations = conn.execute(query, (member_id,)).fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in violations])
+
 @app.route('/health', methods=['GET'])
 def health_check():
     return jsonify({'status': 'healthy', 'database': os.path.exists(DB_PATH)})
