@@ -114,6 +114,15 @@ class UKGAPIClient:
         if employee_id:
             params['employee_id'] = employee_id
         return self.make_request("GET", "payroll/deductions", params=params)
+    
+    def create_tax(self, tax_data):
+        return self.make_request("POST", "payroll/taxes", data=tax_data)
+
+    def get_taxes(self, employee_id):
+        params = {}
+        if employee_id:
+            params['employee_id'] = employee_id
+        return self.make_request("GET", "payroll/taxes", params=params)
 
 if __name__ == '__main__':
     client = UKGAPIClient()
@@ -200,3 +209,21 @@ if __name__ == '__main__':
     deductions = client.get_deductions(employee_id="123")
     print("Deductions:", deductions)
     
+    # # Get taxes
+    # taxes = client.get_taxes(employee_id="EMP001")
+    # print("Taxes:", taxes)
+
+    # Create tax
+    tax_data = {
+        "employee_id": "123",
+        "tax_type": "Federal Income Tax",
+        "amount": 500.00,
+        "taxable_amount": 40000.00
+    }
+    tax = client.create_tax(tax_data=tax_data)
+    print("Created Tax:", tax)
+
+    # Get taxes
+    taxes = client.get_taxes(employee_id="123")
+    print("Taxes:", taxes)
+

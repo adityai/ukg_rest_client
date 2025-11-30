@@ -257,6 +257,23 @@ def test_get_deductions(mock_client):
         assert result['data'][0]['amount'] == 100.0
         mock_make_request.assert_called_once_with('GET', 'payroll/deductions', params={'employee_id': '123'})
 
+def test_create_tax(mock_client):
+    """Test creating a tax"""
+    with patch.object(UKGAPIClient, 'make_request') as mock_make_request:
+        mock_make_request.return_value = {'id': 'tax_123', 'amount': 50.0}
+        
+        tax_data = {
+            'employee_id': '123',
+            'amount': 50.0,
+            'type': 'Federal'
+        }
+        
+        result = mock_client.create_tax(tax_data)
+        
+        assert result['id'] == 'tax_123'
+        assert result['amount'] == 50.0
+        mock_make_request.assert_called_once_with('POST', 'payroll/taxes', data=tax_data)
+
 def test_main_execution():
     """Test main execution block"""
     with patch('ukg_api_client.requests.post') as mock_post:

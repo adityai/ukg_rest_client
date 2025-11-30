@@ -249,6 +249,9 @@ def time_off_requests():
     
     if request.method == 'GET':
         data = list(mock_data['time_off_requests'].values())
+        employee_id = request.args.get('employee_id')
+        if employee_id:
+            data = [d for d in data if d.get('employee_id') == employee_id]
         return jsonify(create_paginated_response(data))
     
     elif request.method == 'POST':
@@ -422,6 +425,9 @@ def pay_stubs():
     
     if request.method == 'GET':
         data = list(mock_data['pay_stubs'].values())
+        employee_id = request.args.get('employee_id')
+        if employee_id:
+            data = [d for d in data if d.get('employee_id') == employee_id]
         return jsonify(create_paginated_response(data))
     
     elif request.method == 'POST':
@@ -464,6 +470,9 @@ def deductions():
     
     if request.method == 'GET':
         data = list(mock_data['deductions'].values())
+        employee_id = request.args.get('employee_id')
+        if employee_id:
+            data = [d for d in data if d.get('employee_id') == employee_id]
         return jsonify(create_paginated_response(data))
     
     elif request.method == 'POST':
@@ -480,6 +489,9 @@ def taxes():
     
     if request.method == 'GET':
         data = list(mock_data['taxes'].values())
+        employee_id = request.args.get('employee_id')
+        if employee_id:
+            data = [d for d in data if d.get('employee_id') == employee_id]
         return jsonify(create_paginated_response(data))
     
     elif request.method == 'POST':
