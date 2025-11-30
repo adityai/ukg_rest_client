@@ -29,41 +29,32 @@ def test_get_access_token(mock_post):
     token = client.get_access_token()
     assert token == 'test_token_123'
 
-# @patch('ukg_api_client.requests.get')
-# def test_list_companies(mock_get, mock_client):
-#     """Test listing companies"""
-#     mock_get.return_value.json.return_value = {'data': [{'id': '1', 'name': 'Test Company'}]}
-#     mock_get.return_value.raise_for_status.return_value = None
+@patch.object(UKGAPIClient, 'make_request')
+def test_list_companies(mock_make_request, mock_client):
+    """Test listing companies"""
+    mock_make_request.return_value = {'data': [{'id': '1', 'name': 'Test Company'}]}
     
-#     companies = mock_client.list_companies()
+    companies = mock_client.list_companies()
     
-#     assert companies['data'][0]['name'] == 'Test Company'
-#     mock_get.assert_called_once_with(
-#         f"{mock_client.BASE_URL}/api/v2/client/companies",
-#         headers=mock_client.headers
-#     )
+    assert companies['data'][0]['name'] == 'Test Company'
+    mock_make_request.assert_called_once_with('GET', 'companies')
 
-# @patch('ukg_api_client.requests.post')
-# def test_create_timesheet(mock_post, mock_client):
-#     """Test timesheet creation"""
-#     mock_post.return_value.json.return_value = {'id': 'ts_123', 'employee_id': '123'}
-#     mock_post.return_value.raise_for_status.return_value = None
+@patch.object(UKGAPIClient, 'make_request')
+def test_create_timesheet(mock_make_request, mock_client):
+    """Test timesheet creation"""
+    mock_make_request.return_value = {'id': 'ts_123', 'employee_id': '123'}
     
-#     timesheet_data = {
-#         'employee_id': '123',
-#         'date': '2025-11-28',
-#         'start_time': '09:00',
-#         'end_time': '17:00'
-#     }
+    timesheet_data = {
+        'employee_id': '123',
+        'date': '2025-11-28',
+        'start_time': '09:00',
+        'end_time': '17:00'
+    }
     
-#     result = mock_client.create_timesheet(timesheet_data)
+    result = mock_client.create_timesheet(timesheet_data)
     
-#     assert result['id'] == 'ts_123'
-#     mock_post.assert_called_once_with(
-#         f"{mock_client.BASE_URL}/api/v2/client/time-attendance/timesheets",
-#         headers=mock_client.headers,
-#         json=timesheet_data
-#     )
+    assert result['id'] == 'ts_123'
+    mock_make_request.assert_called_once_with('POST', 'time-attendance/timesheets', data=timesheet_data)
 
 @patch('ukg_api_client.requests.get')
 def test_get_timesheets(mock_get, mock_client):
@@ -80,11 +71,10 @@ def test_get_timesheets(mock_get, mock_client):
         params={'employee_id': '123'}
     )
 
-@patch('ukg_api_client.requests.post')
-def test_create_vacation_request(mock_post, mock_client):
+@patch.object(UKGAPIClient, 'make_request')
+def test_create_vacation_request(mock_make_request, mock_client):
     """Test vacation request creation"""
-    mock_post.return_value.json.return_value = {'id': 'vr_123', 'status': 'pending'}
-    mock_post.return_value.raise_for_status.return_value = None
+    mock_make_request.return_value = {'id': 'vr_123', 'status': 'pending'}
     
     vacation_data = {
         'employee_id': '123',
@@ -96,6 +86,7 @@ def test_create_vacation_request(mock_post, mock_client):
     
     assert result['id'] == 'vr_123'
     assert result['status'] == 'pending'
+    mock_make_request.assert_called_once_with('POST', 'time-off/requests', data=vacation_data)
 
 @patch('ukg_api_client.requests.get')
 def test_get_vacation_request_by_id(mock_get, mock_client):
@@ -111,31 +102,25 @@ def test_get_vacation_request_by_id(mock_get, mock_client):
         headers=mock_client.headers
     )
 
-@patch('ukg_api_client.requests.put')
-def test_approve_vacation_request(mock_put, mock_client):
+@patch.object(UKGAPIClient, 'make_request')
+def test_approve_vacation_request(mock_make_request, mock_client):
     """Test vacation request approval"""
-    mock_put.return_value.json.return_value = {'id': 'vr_123', 'status': 'approved'}
-    mock_put.return_value.raise_for_status.return_value = None
+    mock_make_request.return_value = {'id': 'vr_123', 'status': 'approved'}
     
     result = mock_client.approve_vacation_request('vr_123', 'manager_456')
     
     assert result['status'] == 'approved'
-    mock_put.assert_called_once()
+    mock_make_request.assert_called_once_with('PUT', 'time-off/requests/vr_123', data={'approver_id': 'manager_456', 'status': 'approved'})
 
-@patch('ukg_api_client.requests.get')
-def test_get_vacation_requests(mock_get, mock_client):
+@patch.object(UKGAPIClient, 'make_request')
+def test_get_vacation_requests(mock_make_request, mock_client):
     """Test retrieving vacation requests for employee"""
-    mock_get.return_value.json.return_value = {'data': [{'id': 'vr_123', 'employee_id': '123'}]}
-    mock_get.return_value.raise_for_status.return_value = None
+    mock_make_request.return_value = {'data': [{'id': 'vr_123', 'employee_id': '123'}]}
     
     result = mock_client.get_vacation_requests('123')
     
     assert len(result['data']) == 1
-    mock_get.assert_called_once_with(
-        f"{mock_client.BASE_URL}/api/v2/client/time-off/requests",
-        headers=mock_client.headers,
-        params={'employee_id': '123'}
-    )
+    mock_make_request.assert_called_once_with('GET', 'time-off/requests', params={'employee_id': '123'})
 
 @patch('ukg_api_client.requests.post')
 def test_authentication_failure(mock_post):
@@ -145,10 +130,10 @@ def test_authentication_failure(mock_post):
     with pytest.raises(Exception):
         UKGAPIClient()
 
-@patch('ukg_api_client.requests.get')
-def test_api_error_handling(mock_get, mock_client):
+@patch.object(UKGAPIClient, 'make_request')
+def test_api_error_handling(mock_make_request, mock_client):
     """Test API error handling"""
-    mock_get.side_effect = Exception("API Error")
+    mock_make_request.side_effect = Exception("API Error")
     
     with pytest.raises(Exception):
         mock_client.list_companies()
@@ -173,46 +158,36 @@ def test_client_initialization():
         assert client.APP_ID == 'test_app'
         assert 'Authorization' in client.headers
 
-@patch('ukg_api_client.requests.get')
-def test_get_payroll_runs(mock_get, mock_client):
+@patch.object(UKGAPIClient, 'make_request')
+def test_get_payroll_runs(mock_make_request, mock_client):
     """Test retrieving payroll runs"""
-    mock_get.return_value.json.return_value = {'data': [{'id': 'pr_123', 'status': 'completed'}]}
-    mock_get.return_value.raise_for_status.return_value = None
+    mock_make_request.return_value = {'data': [{'id': 'pr_123', 'status': 'completed'}]}
     
     result = mock_client.get_payroll_runs()
     
     assert len(result['data']) == 1
     assert result['data'][0]['status'] == 'completed'
+    mock_make_request.assert_called_once_with('GET', 'payroll/runs')
 
-@patch('ukg_api_client.requests.get')
-def test_get_pay_stubs_with_employee(mock_get, mock_client):
+@patch.object(UKGAPIClient, 'make_request')
+def test_get_pay_stubs_with_employee(mock_make_request, mock_client):
     """Test retrieving pay stubs with employee filter"""
-    mock_get.return_value.json.return_value = {'data': [{'id': 'ps_123', 'employee_id': '123'}]}
-    mock_get.return_value.raise_for_status.return_value = None
+    mock_make_request.return_value = {'data': [{'id': 'ps_123', 'employee_id': '123'}]}
     
     result = mock_client.get_pay_stubs('123')
     
     assert len(result['data']) == 1
-    mock_get.assert_called_once_with(
-        f"{mock_client.BASE_URL}/api/v2/client/payroll/pay-stubs",
-        headers=mock_client.headers,
-        params={'employee_id': '123'}
-    )
+    mock_make_request.assert_called_once_with('GET', 'payroll/pay-stubs', params={'employee_id': '123'})
 
-@patch('ukg_api_client.requests.get')
-def test_get_pay_stubs_no_employee(mock_get, mock_client):
+@patch.object(UKGAPIClient, 'make_request')
+def test_get_pay_stubs_no_employee(mock_make_request, mock_client):
     """Test retrieving pay stubs without employee filter"""
-    mock_get.return_value.json.return_value = {'data': [{'id': 'ps_123'}, {'id': 'ps_456'}]}
-    mock_get.return_value.raise_for_status.return_value = None
+    mock_make_request.return_value = {'data': [{'id': 'ps_123'}, {'id': 'ps_456'}]}
     
     result = mock_client.get_pay_stubs(None)
     
     assert len(result['data']) == 2
-    mock_get.assert_called_once_with(
-        f"{mock_client.BASE_URL}/api/v2/client/payroll/pay-stubs",
-        headers=mock_client.headers,
-        params={}
-    )
+    mock_make_request.assert_called_once_with('GET', 'payroll/pay-stubs', params={})
 
 @patch('ukg_api_client.requests.get')
 def test_get_timesheets_with_dates(mock_get, mock_client):
@@ -244,20 +219,15 @@ def test_get_timesheets_no_params(mock_get, mock_client):
         params={}
     )
 
-@patch('ukg_api_client.requests.get')
-def test_get_vacation_requests_no_employee(mock_get, mock_client):
+@patch.object(UKGAPIClient, 'make_request')
+def test_get_vacation_requests_no_employee(mock_make_request, mock_client):
     """Test retrieving vacation requests without employee filter"""
-    mock_get.return_value.json.return_value = {'data': []}
-    mock_get.return_value.raise_for_status.return_value = None
+    mock_make_request.return_value = {'data': []}
     
     result = mock_client.get_vacation_requests(None)
     
     assert len(result['data']) == 0
-    mock_get.assert_called_once_with(
-        f"{mock_client.BASE_URL}/api/v2/client/time-off/requests",
-        headers=mock_client.headers,
-        params={}
-    )
+    mock_make_request.assert_called_once_with('GET', 'time-off/requests', params={})
 
 def test_main_execution():
     """Test main execution block"""
