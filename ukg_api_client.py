@@ -133,6 +133,18 @@ class UKGAPIClient:
     
     def get_employee_by_uuid(self, employee_uuid):
         return self.make_request("GET", f"employees/{employee_uuid}")
+    
+    def get_departments(self):
+        return self.make_request("GET", "configuration/departments")
+    
+    def get_locations(self):
+        return self.make_request("GET", "configuration/locations")
+    
+    def get_organization_hierarchy(self, company_id=None):
+        params = {}
+        if company_id:
+            params['company_id'] = company_id
+        return self.make_request("GET", "organization/hierarchy", params=params)
 
 if __name__ == '__main__':
     client = UKGAPIClient()
@@ -261,4 +273,16 @@ if __name__ == '__main__':
     }
     new_employee = client.create_employee(data=new_employee_data)
     print("New Employee:", new_employee)
+    
+    # Get departments
+    departments = client.get_departments()
+    print("Departments:", departments)
+    
+    # Get locations
+    locations = client.get_locations()
+    print("Locations:", locations)
+    
+    # Get organization hierarchy
+    org_hierarchy = client.get_organization_hierarchy()
+    print("Organization Hierarchy:", org_hierarchy)
     

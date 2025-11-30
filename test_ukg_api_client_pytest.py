@@ -310,6 +310,49 @@ def test_get_employee_by_uuid(mock_make_request, mock_client):
     assert result['id'] == 'emp_123'
     mock_make_request.assert_called_once_with('GET', 'employees/emp_123')
 
+@patch.object(UKGAPIClient, 'make_request')
+def test_get_departments(mock_make_request, mock_client):
+    """Test getting departments"""
+    mock_make_request.return_value = {'data': [{'id': 'DEPT001', 'name': 'Engineering'}]}
+    
+    result = mock_client.get_departments()
+    
+    assert len(result['data']) == 1
+    assert result['data'][0]['name'] == 'Engineering'
+    mock_make_request.assert_called_once_with('GET', 'configuration/departments')
+
+@patch.object(UKGAPIClient, 'make_request')
+def test_get_locations(mock_make_request, mock_client):
+    """Test getting locations"""
+    mock_make_request.return_value = {'data': [{'id': 'LOC001', 'name': 'San Francisco HQ'}]}
+    
+    result = mock_client.get_locations()
+    
+    assert len(result['data']) == 1
+    assert result['data'][0]['name'] == 'San Francisco HQ'
+    mock_make_request.assert_called_once_with('GET', 'configuration/locations')
+
+@patch.object(UKGAPIClient, 'make_request')
+def test_get_organization_hierarchy(mock_make_request, mock_client):
+    """Test getting organization hierarchy"""
+    mock_make_request.return_value = {'structure': [{'id': 'ORG001', 'name': 'CEO'}]}
+    
+    result = mock_client.get_organization_hierarchy()
+    
+    assert len(result['structure']) == 1
+    assert result['structure'][0]['name'] == 'CEO'
+    mock_make_request.assert_called_once_with('GET', 'organization/hierarchy', params={})
+
+@patch.object(UKGAPIClient, 'make_request')
+def test_get_organization_hierarchy_with_company(mock_make_request, mock_client):
+    """Test getting organization hierarchy with company filter"""
+    mock_make_request.return_value = {'structure': [{'id': 'ORG001', 'name': 'CEO'}]}
+    
+    result = mock_client.get_organization_hierarchy('company_123')
+    
+    assert len(result['structure']) == 1
+    mock_make_request.assert_called_once_with('GET', 'organization/hierarchy', params={'company_id': 'company_123'})
+
 def test_main_execution():
     """Test main execution block"""
     with patch('ukg_api_client.requests.post') as mock_post:
