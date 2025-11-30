@@ -124,6 +124,16 @@ class UKGAPIClient:
             params['employee_id'] = employee_id
         return self.make_request("GET", "payroll/taxes", params=params)
 
+    # EMPLOYEE & ORGANIZATION
+    def list_employees(self, params = None):
+        return self.make_request("GET", "employees", params=params)
+    
+    def create_employee(self, data):
+        return self.make_request("POST", "employees", data=data)
+    
+    def get_employee_by_uuid(self, employee_uuid):
+        return self.make_request("GET", f"employees/{employee_uuid}")
+
 if __name__ == '__main__':
     client = UKGAPIClient()
     companies = client.list_companies()
@@ -209,10 +219,6 @@ if __name__ == '__main__':
     deductions = client.get_deductions(employee_id="123")
     print("Deductions:", deductions)
     
-    # # Get taxes
-    # taxes = client.get_taxes(employee_id="EMP001")
-    # print("Taxes:", taxes)
-
     # Create tax
     tax_data = {
         "employee_id": "123",
@@ -227,3 +233,32 @@ if __name__ == '__main__':
     taxes = client.get_taxes(employee_id="123")
     print("Taxes:", taxes)
 
+    # List employees
+    employees = client.list_employees()
+    print("Employees:", employees)
+
+    # Get employee by ID (use the UUID id from the employee list)
+    employee_uuid = employees['data'][0]['id']  # Get the first employee's UUID
+    employee = client.get_employee_by_uuid(employee_uuid=employee_uuid)
+    print("Employee:", employee)
+
+    # Create employee
+    new_employee_data = {
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "Y8TtQ@example.com",
+        "phone": "123-456-7890",
+        "address": "123 Main St, Anytown, USA",
+        "city": "Anytown",
+        "state": "CA",
+        "zip_code": "12345",
+        "country": "USA",
+        "date_of_birth": "1990-01-01",
+        "hire_date": "2022-01-01",
+        "job_title": "Software Engineer",
+        "department": "IT",
+        "salary": 50000
+    }
+    new_employee = client.create_employee(data=new_employee_data)
+    print("New Employee:", new_employee)
+    

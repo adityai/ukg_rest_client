@@ -541,6 +541,37 @@ def departments():
         return jsonify({'error': 'Unauthorized'}), 401
     
     data = list(mock_data['departments'].values())
+    # Add sample departments if none exist
+    if not data:
+        sample_departments = [
+            {
+                'id': 'DEPT001',
+                'name': 'Engineering',
+                'description': 'Software Development and Engineering',
+                'manager_id': 'EMP001',
+                'company_id': 'default',
+                'cost_center': 'CC-ENG-001'
+            },
+            {
+                'id': 'DEPT002', 
+                'name': 'Human Resources',
+                'description': 'HR and People Operations',
+                'manager_id': 'EMP002',
+                'company_id': 'default',
+                'cost_center': 'CC-HR-001'
+            },
+            {
+                'id': 'DEPT003',
+                'name': 'Operations',
+                'description': 'Business Operations and Manufacturing',
+                'manager_id': 'EMP003',
+                'company_id': 'default',
+                'cost_center': 'CC-OPS-001'
+            }
+        ]
+        for dept in sample_departments:
+            mock_data['departments'][dept['id']] = dept
+        data = sample_departments
     return jsonify(create_paginated_response(data))
 
 @app.route('/api/v2/client/configuration/departments/<dept_id>', methods=['GET'])
@@ -567,6 +598,46 @@ def locations():
         return jsonify({'error': 'Unauthorized'}), 401
     
     data = list(mock_data['locations'].values())
+    # Add sample locations if none exist
+    if not data:
+        sample_locations = [
+            {
+                'id': 'LOC001',
+                'name': 'San Francisco HQ',
+                'address': '123 Market Street',
+                'city': 'San Francisco',
+                'state': 'CA',
+                'zip_code': '94105',
+                'country': 'USA',
+                'timezone': 'America/Los_Angeles',
+                'facility_type': 'headquarters'
+            },
+            {
+                'id': 'LOC002',
+                'name': 'Detroit Manufacturing',
+                'address': '456 Industrial Blvd',
+                'city': 'Detroit',
+                'state': 'MI', 
+                'zip_code': '48201',
+                'country': 'USA',
+                'timezone': 'America/Detroit',
+                'facility_type': 'manufacturing'
+            },
+            {
+                'id': 'LOC003',
+                'name': 'Austin Remote Hub',
+                'address': '789 Tech Drive',
+                'city': 'Austin',
+                'state': 'TX',
+                'zip_code': '73301',
+                'country': 'USA',
+                'timezone': 'America/Chicago',
+                'facility_type': 'remote_hub'
+            }
+        ]
+        for loc in sample_locations:
+            mock_data['locations'][loc['id']] = loc
+        data = sample_locations
     return jsonify(create_paginated_response(data))
 
 # Benefits Endpoints
@@ -806,10 +877,54 @@ def org_hierarchy():
     hierarchy = {
         'company_id': request.args.get('company_id', 'default'),
         'structure': [
-            {'id': '1', 'name': 'CEO', 'level': 0, 'parent_id': None},
-            {'id': '2', 'name': 'VP Engineering', 'level': 1, 'parent_id': '1'},
-            {'id': '3', 'name': 'VP Sales', 'level': 1, 'parent_id': '1'}
-        ]
+            {
+                'id': 'ORG001',
+                'name': 'Chief Executive Officer',
+                'employee_id': 'CEO001',
+                'level': 0,
+                'parent_id': None,
+                'department_id': 'DEPT000',
+                'location_id': 'LOC001'
+            },
+            {
+                'id': 'ORG002',
+                'name': 'VP Engineering',
+                'employee_id': 'EMP001',
+                'level': 1,
+                'parent_id': 'ORG001',
+                'department_id': 'DEPT001',
+                'location_id': 'LOC001'
+            },
+            {
+                'id': 'ORG003',
+                'name': 'VP Human Resources',
+                'employee_id': 'EMP002',
+                'level': 1,
+                'parent_id': 'ORG001',
+                'department_id': 'DEPT002',
+                'location_id': 'LOC001'
+            },
+            {
+                'id': 'ORG004',
+                'name': 'VP Operations',
+                'employee_id': 'EMP003',
+                'level': 1,
+                'parent_id': 'ORG001',
+                'department_id': 'DEPT003',
+                'location_id': 'LOC002'
+            },
+            {
+                'id': 'ORG005',
+                'name': 'Senior Software Engineer',
+                'employee_id': 'EMP004',
+                'level': 2,
+                'parent_id': 'ORG002',
+                'department_id': 'DEPT001',
+                'location_id': 'LOC003'
+            }
+        ],
+        'total_levels': 3,
+        'total_positions': 5
     }
     return jsonify(hierarchy)
 

@@ -274,6 +274,42 @@ def test_create_tax(mock_client):
         assert result['amount'] == 50.0
         mock_make_request.assert_called_once_with('POST', 'payroll/taxes', data=tax_data)
 
+@patch.object(UKGAPIClient, 'make_request')
+def test_list_employees(mock_make_request, mock_client):
+    """Test listing employees"""
+    mock_make_request.return_value = {'data': [{'id': 'emp_123', 'name': 'John Doe'}]}
+    
+    result = mock_client.list_employees()
+    
+    assert len(result['data']) == 1
+    mock_make_request.assert_called_once_with('GET', 'employees', params=None)
+
+@patch.object(UKGAPIClient, 'make_request')
+def test_create_employee(mock_make_request, mock_client):
+    """Test creating an employee"""
+    mock_make_request.return_value = {'id': 'emp_123', 'name': 'John Doe'}
+    
+    employee_data = {
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'email': 'john.doe@example.com'
+    }
+    
+    result = mock_client.create_employee(employee_data)
+    
+    assert result['id'] == 'emp_123'
+    mock_make_request.assert_called_once_with('POST', 'employees', data=employee_data)
+
+@patch.object(UKGAPIClient, 'make_request')
+def test_get_employee_by_uuid(mock_make_request, mock_client):
+    """Test getting employee by UUID"""
+    mock_make_request.return_value = {'id': 'emp_123', 'name': 'John Doe'}
+    
+    result = mock_client.get_employee_by_uuid('emp_123')
+    
+    assert result['id'] == 'emp_123'
+    mock_make_request.assert_called_once_with('GET', 'employees/emp_123')
+
 def test_main_execution():
     """Test main execution block"""
     with patch('ukg_api_client.requests.post') as mock_post:
