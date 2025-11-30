@@ -71,9 +71,7 @@ class UKGAPIClient:
         return response.json()
     
     def create_vacation_request(self, data):
-        response = requests.post(f"{self.BASE_URL}/api/v2/client/time-off/requests", headers=self.headers, json=data)
-        response.raise_for_status()
-        return response.json()
+        return self.make_request("POST", "time-off/requests", data=data)
     
     def get_vacation_request_by_id(self, request_id):
         response = requests.get(f"{self.BASE_URL}/api/v2/client/time-off/requests/{request_id}", headers=self.headers)
@@ -85,41 +83,29 @@ class UKGAPIClient:
             "approver_id": approver_id,
             "status": "approved"
         }
-        response = requests.put(f"{self.BASE_URL}/api/v2/client/time-off/requests/{request_id}", headers=self.headers, json=data)
-        response.raise_for_status()
-        return response.json()
+        return self.make_request("PUT", f"time-off/requests/{request_id}", data=data)
     
     def get_vacation_requests(self, employee_id):
         params = {}
         if employee_id:
             params['employee_id'] = employee_id
-        response = requests.get(f"{self.BASE_URL}/api/v2/client/time-off/requests", headers=self.headers, params=params)
-        response.raise_for_status()
-        return response.json()
+        return self.make_request("GET", "time-off/requests", params=params)
     
     def get_payroll_runs(self):
-        response = requests.get(f"{self.BASE_URL}/api/v2/client/payroll/runs", headers=self.headers)
-        response.raise_for_status()
-        return response.json()
+        return self.make_request("GET", "payroll/runs")
     
     def create_payroll_runs(self, payroll_run_data):
-        response = requests.post(f"{self.BASE_URL}/api/v2/client/payroll/runs", headers=self.headers, json=payroll_run_data)
-        response.raise_for_status()
-        return response.json()
+        return self.make_request("POST", "payroll/runs", data=payroll_run_data)
     
     def create_pay_stubs(self, pay_stub_data):
-        response = requests.post(f"{self.BASE_URL}/api/v2/client/payroll/pay-stubs", headers=self.headers, json=pay_stub_data)
-        response.raise_for_status()
-        return response.json()
+        return self.make_request("POST", "payroll/pay-stubs", data=pay_stub_data)
     
     def get_pay_stubs(self, employee_id):
         params = {}
         if employee_id:
             params['employee_id'] = employee_id
-        response = requests.get(f"{self.BASE_URL}/api/v2/client/payroll/pay-stubs", headers=self.headers, params=params)
-        response.raise_for_status()
-        return response.json()
-
+        return self.make_request("GET", "payroll/pay-stubs", params=params)
+    
 if __name__ == '__main__':
     client = UKGAPIClient()
     companies = client.list_companies()
