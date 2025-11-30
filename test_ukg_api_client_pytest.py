@@ -229,6 +229,34 @@ def test_get_vacation_requests_no_employee(mock_make_request, mock_client):
     assert len(result['data']) == 0
     mock_make_request.assert_called_once_with('GET', 'time-off/requests', params={})
 
+def test_create_deduction(mock_client):
+    """Test creating a deduction"""
+    with patch.object(UKGAPIClient, 'make_request') as mock_make_request:
+        mock_make_request.return_value = {'id': 'ded_123', 'amount': 100.0}
+        
+        deduction_data = {
+            'employee_id': '123',
+            'amount': 100.0,
+            'reason': 'Health Insurance'
+        }
+        
+        result = mock_client.create_deduction(deduction_data)
+        
+        assert result['id'] == 'ded_123'
+        assert result['amount'] == 100.0
+        mock_make_request.assert_called_once_with('POST', 'payroll/deductions', data=deduction_data)
+
+def test_get_deductions(mock_client):
+    """Test retrieving deductions for an employee"""
+    with patch.object(UKGAPIClient, 'make_request') as mock_make_request:
+        mock_make_request.return_value = {'data': [{'id': 'ded_123', 'amount': 100.0}]}
+        
+        result = mock_client.get_deductions('123')
+        
+        assert len(result['data']) == 1
+        assert result['data'][0]['amount'] == 100.0
+        mock_make_request.assert_called_once_with('GET', 'payroll/deductions', params={'employee_id': '123'})
+
 def test_main_execution():
     """Test main execution block"""
     with patch('ukg_api_client.requests.post') as mock_post:

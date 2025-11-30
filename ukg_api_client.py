@@ -106,6 +106,15 @@ class UKGAPIClient:
             params['employee_id'] = employee_id
         return self.make_request("GET", "payroll/pay-stubs", params=params)
     
+    def create_deduction(self, deduction_data):
+        return self.make_request("POST", "payroll/deductions", data=deduction_data)
+
+    def get_deductions(self, employee_id):
+        params = {}
+        if employee_id:
+            params['employee_id'] = employee_id
+        return self.make_request("GET", "payroll/deductions", params=params)
+
 if __name__ == '__main__':
     client = UKGAPIClient()
     companies = client.list_companies()
@@ -177,3 +186,17 @@ if __name__ == '__main__':
     # Get pay stubs
     pay_stubs = client.get_pay_stubs(employee_id="123")
     print("Pay Stubs:", pay_stubs)
+
+    # Create deduction
+    deduction_data = {
+        "employee_id": "123",
+        "name": "Health Insurance",
+        "amount": 100
+    }
+    deduction = client.create_deduction(deduction_data=deduction_data)
+    print("Created Deduction:", deduction)
+
+    # Get deductions
+    deductions = client.get_deductions(employee_id="123")
+    print("Deductions:", deductions)
+    
