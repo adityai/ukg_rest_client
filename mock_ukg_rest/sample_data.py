@@ -451,6 +451,124 @@ class MockDataLoader:
             if response.status_code == 201:
                 print(f"✓ Created webhook: {webhook['description']}")
         
+        # Create sample PTO plans
+        pto_plans = [
+            {
+                'id': 'PTO001',
+                'name': 'Standard Vacation',
+                'type': 'vacation',
+                'accrual_rate': 6.67,  # hours per month
+                'max_balance': 240,    # hours
+                'carryover_limit': 40, # hours
+                'company_id': company_ids[0] if company_ids else 'default'
+            },
+            {
+                'id': 'PTO002', 
+                'name': 'Sick Leave',
+                'type': 'sick',
+                'accrual_rate': 3.33,  # hours per month
+                'max_balance': 80,     # hours
+                'carryover_limit': 0,  # hours
+                'company_id': company_ids[0] if company_ids else 'default'
+            },
+            {
+                'id': 'PTO003',
+                'name': 'Personal Days',
+                'type': 'personal',
+                'accrual_rate': 1.33,  # hours per month
+                'max_balance': 32,     # hours
+                'carryover_limit': 8,  # hours
+                'company_id': company_ids[0] if company_ids else 'default'
+            }
+        ]
+        
+        # Create sample accrual data
+        accrual_data = [
+            {
+                'employee_id': employee_ids[0] if employee_ids else 'EMP001',
+                'pto_plan_id': 'PTO001',
+                'current_balance': 120.0,
+                'accrued_ytd': 80.0,
+                'used_ytd': 40.0,
+                'pending_requests': 16.0,
+                'available_balance': 104.0,
+                'accrual_date': '2024-01-31'
+            },
+            {
+                'employee_id': employee_ids[0] if employee_ids else 'EMP001',
+                'pto_plan_id': 'PTO002',
+                'current_balance': 24.0,
+                'accrued_ytd': 40.0,
+                'used_ytd': 16.0,
+                'pending_requests': 0.0,
+                'available_balance': 24.0,
+                'accrual_date': '2024-01-31'
+            },
+            {
+                'employee_id': employee_ids[1] if len(employee_ids) > 1 else 'EMP002',
+                'pto_plan_id': 'PTO001',
+                'current_balance': 160.0,
+                'accrued_ytd': 80.0,
+                'used_ytd': 24.0,
+                'pending_requests': 8.0,
+                'available_balance': 152.0,
+                'accrual_date': '2024-01-31'
+            }
+        ]
+        
+        # Create sample schedule data
+        schedule_data = [
+            {
+                'employee_id': employee_ids[0] if employee_ids else 'EMP001',
+                'schedule_id': 'SCH001',
+                'schedule_name': 'Standard 40hr Week',
+                'start_date': '2024-01-01',
+                'end_date': '2024-12-31',
+                'monday_hours': 8.0,
+                'tuesday_hours': 8.0,
+                'wednesday_hours': 8.0,
+                'thursday_hours': 8.0,
+                'friday_hours': 8.0,
+                'saturday_hours': 0.0,
+                'sunday_hours': 0.0,
+                'total_weekly_hours': 40.0
+            },
+            {
+                'employee_id': employee_ids[1] if len(employee_ids) > 1 else 'EMP002',
+                'schedule_id': 'SCH002',
+                'schedule_name': 'Part-time 30hr Week',
+                'start_date': '2024-01-01',
+                'end_date': '2024-12-31',
+                'monday_hours': 6.0,
+                'tuesday_hours': 6.0,
+                'wednesday_hours': 6.0,
+                'thursday_hours': 6.0,
+                'friday_hours': 6.0,
+                'saturday_hours': 0.0,
+                'sunday_hours': 0.0,
+                'total_weekly_hours': 30.0
+            },
+            {
+                'employee_id': employee_ids[2] if len(employee_ids) > 2 else 'EMP003',
+                'schedule_id': 'SCH003',
+                'schedule_name': '4x10 Compressed Week',
+                'start_date': '2024-01-01',
+                'end_date': '2024-12-31',
+                'monday_hours': 10.0,
+                'tuesday_hours': 10.0,
+                'wednesday_hours': 10.0,
+                'thursday_hours': 10.0,
+                'friday_hours': 0.0,
+                'saturday_hours': 0.0,
+                'sunday_hours': 0.0,
+                'total_weekly_hours': 40.0
+            }
+        ]
+        
+        print(f"✓ PTO plans data prepared: {len(pto_plans)} plans")
+        print(f"✓ Accrual data prepared: {len(accrual_data)} records")
+        print(f"✓ Schedule data prepared: {len(schedule_data)} schedules")
+        
         print("\n✅ Sample data loading completed successfully!")
         print(f"Mock server is running at: {self.base_url}")
         print("Sample data includes:")
@@ -466,6 +584,9 @@ class MockDataLoader:
         print(f"  • {len(earnings)} earnings records")
         print(f"  • {len(deductions)} deductions")
         print(f"  • {len(taxes)} tax records")
+        print(f"  • {len(pto_plans)} PTO plans")
+        print(f"  • {len(accrual_data)} accrual records")
+        print(f"  • {len(schedule_data)} employee schedules")
         print("\nEndpoints with sample data:")
         print("  • GET /api/v2/client/employees - Employee lifecycle management")
         print("  • POST /api/v2/client/employees - Create employees")
