@@ -36,6 +36,12 @@ export UKG_BASE_URL="http://localhost:8080"
 python ukg_api_client.py
 ```
 
+## Run the 'union leave workflow':
+
+```
+python union_leave_workflow.py
+```
+
 ## For Production (Real UKG Pro Services)
 
 To connect to actual UKG Pro web services:
