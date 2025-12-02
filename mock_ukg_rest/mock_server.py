@@ -249,6 +249,9 @@ def time_off_requests():
     
     if request.method == 'GET':
         data = list(mock_data['time_off_requests'].values())
+        employee_id = request.args.get('employee_id')
+        if employee_id:
+            data = [d for d in data if d.get('employee_id') == employee_id]
         return jsonify(create_paginated_response(data))
     
     elif request.method == 'POST':
@@ -301,6 +304,60 @@ def reject_time_off_request(request_id):
     req['status'] = 'rejected'
     req['rejected_at'] = datetime.now().isoformat()
     return jsonify(req)
+
+@app.route('/api/v2/client/time-off/accrual-balances', methods=['GET'])
+def accrual_balances():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    employee_id = request.args.get('employee_id')
+    data = [
+        {
+            'employee_id': employee_id or 'EMP001',
+            'accrual_type': 'vacation',
+            'current_balance': 120.0,
+            'accrued_ytd': 80.0,
+            'used_ytd': 40.0,
+            'projected_balance': 140.0
+        },
+        {
+            'employee_id': employee_id or 'EMP001',
+            'accrual_type': 'sick',
+            'current_balance': 24.0,
+            'accrued_ytd': 40.0,
+            'used_ytd': 16.0,
+            'projected_balance': 32.0
+        }
+    ]
+    if employee_id:
+        data = [d for d in data if d['employee_id'] == employee_id]
+    return jsonify(create_paginated_response(data))
+
+@app.route('/api/v2/client/time-off/pto-plans', methods=['GET'])
+def pto_plans():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    employee_id = request.args.get('employee_id')
+    data = [
+        {
+            'plan_id': 'PTO001',
+            'name': 'Standard Vacation',
+            'type': 'vacation',
+            'accrual_rate': 6.67,
+            'max_balance': 240,
+            'carryover_limit': 40
+        },
+        {
+            'plan_id': 'PTO002',
+            'name': 'Sick Leave',
+            'type': 'sick',
+            'accrual_rate': 3.33,
+            'max_balance': 80,
+            'carryover_limit': 0
+        }
+    ]
+    return jsonify(create_paginated_response(data))
 
 @app.route('/api/v2/client/time-attendance/timesheets', methods=['GET', 'POST'])
 def timesheets():
@@ -422,6 +479,9 @@ def pay_stubs():
     
     if request.method == 'GET':
         data = list(mock_data['pay_stubs'].values())
+        employee_id = request.args.get('employee_id')
+        if employee_id:
+            data = [d for d in data if d.get('employee_id') == employee_id]
         return jsonify(create_paginated_response(data))
     
     elif request.method == 'POST':
@@ -464,6 +524,9 @@ def deductions():
     
     if request.method == 'GET':
         data = list(mock_data['deductions'].values())
+        employee_id = request.args.get('employee_id')
+        if employee_id:
+            data = [d for d in data if d.get('employee_id') == employee_id]
         return jsonify(create_paginated_response(data))
     
     elif request.method == 'POST':
@@ -480,6 +543,9 @@ def taxes():
     
     if request.method == 'GET':
         data = list(mock_data['taxes'].values())
+        employee_id = request.args.get('employee_id')
+        if employee_id:
+            data = [d for d in data if d.get('employee_id') == employee_id]
         return jsonify(create_paginated_response(data))
     
     elif request.method == 'POST':
@@ -529,6 +595,37 @@ def departments():
         return jsonify({'error': 'Unauthorized'}), 401
     
     data = list(mock_data['departments'].values())
+    # Add sample departments if none exist
+    if not data:
+        sample_departments = [
+            {
+                'id': 'DEPT001',
+                'name': 'Engineering',
+                'description': 'Software Development and Engineering',
+                'manager_id': 'EMP001',
+                'company_id': 'default',
+                'cost_center': 'CC-ENG-001'
+            },
+            {
+                'id': 'DEPT002', 
+                'name': 'Human Resources',
+                'description': 'HR and People Operations',
+                'manager_id': 'EMP002',
+                'company_id': 'default',
+                'cost_center': 'CC-HR-001'
+            },
+            {
+                'id': 'DEPT003',
+                'name': 'Operations',
+                'description': 'Business Operations and Manufacturing',
+                'manager_id': 'EMP003',
+                'company_id': 'default',
+                'cost_center': 'CC-OPS-001'
+            }
+        ]
+        for dept in sample_departments:
+            mock_data['departments'][dept['id']] = dept
+        data = sample_departments
     return jsonify(create_paginated_response(data))
 
 @app.route('/api/v2/client/configuration/departments/<dept_id>', methods=['GET'])
@@ -555,6 +652,46 @@ def locations():
         return jsonify({'error': 'Unauthorized'}), 401
     
     data = list(mock_data['locations'].values())
+    # Add sample locations if none exist
+    if not data:
+        sample_locations = [
+            {
+                'id': 'LOC001',
+                'name': 'San Francisco HQ',
+                'address': '123 Market Street',
+                'city': 'San Francisco',
+                'state': 'CA',
+                'zip_code': '94105',
+                'country': 'USA',
+                'timezone': 'America/Los_Angeles',
+                'facility_type': 'headquarters'
+            },
+            {
+                'id': 'LOC002',
+                'name': 'Detroit Manufacturing',
+                'address': '456 Industrial Blvd',
+                'city': 'Detroit',
+                'state': 'MI', 
+                'zip_code': '48201',
+                'country': 'USA',
+                'timezone': 'America/Detroit',
+                'facility_type': 'manufacturing'
+            },
+            {
+                'id': 'LOC003',
+                'name': 'Austin Remote Hub',
+                'address': '789 Tech Drive',
+                'city': 'Austin',
+                'state': 'TX',
+                'zip_code': '73301',
+                'country': 'USA',
+                'timezone': 'America/Chicago',
+                'facility_type': 'remote_hub'
+            }
+        ]
+        for loc in sample_locations:
+            mock_data['locations'][loc['id']] = loc
+        data = sample_locations
     return jsonify(create_paginated_response(data))
 
 # Benefits Endpoints
@@ -794,10 +931,54 @@ def org_hierarchy():
     hierarchy = {
         'company_id': request.args.get('company_id', 'default'),
         'structure': [
-            {'id': '1', 'name': 'CEO', 'level': 0, 'parent_id': None},
-            {'id': '2', 'name': 'VP Engineering', 'level': 1, 'parent_id': '1'},
-            {'id': '3', 'name': 'VP Sales', 'level': 1, 'parent_id': '1'}
-        ]
+            {
+                'id': 'ORG001',
+                'name': 'Chief Executive Officer',
+                'employee_id': 'CEO001',
+                'level': 0,
+                'parent_id': None,
+                'department_id': 'DEPT000',
+                'location_id': 'LOC001'
+            },
+            {
+                'id': 'ORG002',
+                'name': 'VP Engineering',
+                'employee_id': 'EMP001',
+                'level': 1,
+                'parent_id': 'ORG001',
+                'department_id': 'DEPT001',
+                'location_id': 'LOC001'
+            },
+            {
+                'id': 'ORG003',
+                'name': 'VP Human Resources',
+                'employee_id': 'EMP002',
+                'level': 1,
+                'parent_id': 'ORG001',
+                'department_id': 'DEPT002',
+                'location_id': 'LOC001'
+            },
+            {
+                'id': 'ORG004',
+                'name': 'VP Operations',
+                'employee_id': 'EMP003',
+                'level': 1,
+                'parent_id': 'ORG001',
+                'department_id': 'DEPT003',
+                'location_id': 'LOC002'
+            },
+            {
+                'id': 'ORG005',
+                'name': 'Senior Software Engineer',
+                'employee_id': 'EMP004',
+                'level': 2,
+                'parent_id': 'ORG002',
+                'department_id': 'DEPT001',
+                'location_id': 'LOC003'
+            }
+        ],
+        'total_levels': 3,
+        'total_positions': 5
     }
     return jsonify(hierarchy)
 

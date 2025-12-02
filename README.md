@@ -72,3 +72,17 @@ UKG_CLIENT_ID=your_actual_client_id
 UKG_COMPANY_SHORT_NAME=your_company_short_name
 UKG_BASE_URL=https://api.ultipro.com
 ```
+
+## Additional data
+
+UKG Pro does not host all the data required by an employer that deals with unions. Additional sample data has been created in a standalone sqlite database for hosting union entitlement data.
+
+The sqlite database file is named `union_entitlements.db` and is located in the external_data subdirectory.
+
+The database has the following tables:
+- unions
+- union_members
+- entitlements
+- member_entitlements
+
+

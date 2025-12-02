@@ -229,6 +229,130 @@ def test_get_vacation_requests_no_employee(mock_make_request, mock_client):
     assert len(result['data']) == 0
     mock_make_request.assert_called_once_with('GET', 'time-off/requests', params={})
 
+def test_create_deduction(mock_client):
+    """Test creating a deduction"""
+    with patch.object(UKGAPIClient, 'make_request') as mock_make_request:
+        mock_make_request.return_value = {'id': 'ded_123', 'amount': 100.0}
+        
+        deduction_data = {
+            'employee_id': '123',
+            'amount': 100.0,
+            'reason': 'Health Insurance'
+        }
+        
+        result = mock_client.create_deduction(deduction_data)
+        
+        assert result['id'] == 'ded_123'
+        assert result['amount'] == 100.0
+        mock_make_request.assert_called_once_with('POST', 'payroll/deductions', data=deduction_data)
+
+def test_get_deductions(mock_client):
+    """Test retrieving deductions for an employee"""
+    with patch.object(UKGAPIClient, 'make_request') as mock_make_request:
+        mock_make_request.return_value = {'data': [{'id': 'ded_123', 'amount': 100.0}]}
+        
+        result = mock_client.get_deductions('123')
+        
+        assert len(result['data']) == 1
+        assert result['data'][0]['amount'] == 100.0
+        mock_make_request.assert_called_once_with('GET', 'payroll/deductions', params={'employee_id': '123'})
+
+def test_create_tax(mock_client):
+    """Test creating a tax"""
+    with patch.object(UKGAPIClient, 'make_request') as mock_make_request:
+        mock_make_request.return_value = {'id': 'tax_123', 'amount': 50.0}
+        
+        tax_data = {
+            'employee_id': '123',
+            'amount': 50.0,
+            'type': 'Federal'
+        }
+        
+        result = mock_client.create_tax(tax_data)
+        
+        assert result['id'] == 'tax_123'
+        assert result['amount'] == 50.0
+        mock_make_request.assert_called_once_with('POST', 'payroll/taxes', data=tax_data)
+
+@patch.object(UKGAPIClient, 'make_request')
+def test_list_employees(mock_make_request, mock_client):
+    """Test listing employees"""
+    mock_make_request.return_value = {'data': [{'id': 'emp_123', 'name': 'John Doe'}]}
+    
+    result = mock_client.list_employees()
+    
+    assert len(result['data']) == 1
+    mock_make_request.assert_called_once_with('GET', 'employees', params=None)
+
+@patch.object(UKGAPIClient, 'make_request')
+def test_create_employee(mock_make_request, mock_client):
+    """Test creating an employee"""
+    mock_make_request.return_value = {'id': 'emp_123', 'name': 'John Doe'}
+    
+    employee_data = {
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'email': 'john.doe@example.com'
+    }
+    
+    result = mock_client.create_employee(employee_data)
+    
+    assert result['id'] == 'emp_123'
+    mock_make_request.assert_called_once_with('POST', 'employees', data=employee_data)
+
+@patch.object(UKGAPIClient, 'make_request')
+def test_get_employee_by_uuid(mock_make_request, mock_client):
+    """Test getting employee by UUID"""
+    mock_make_request.return_value = {'id': 'emp_123', 'name': 'John Doe'}
+    
+    result = mock_client.get_employee_by_uuid('emp_123')
+    
+    assert result['id'] == 'emp_123'
+    mock_make_request.assert_called_once_with('GET', 'employees/emp_123')
+
+@patch.object(UKGAPIClient, 'make_request')
+def test_get_departments(mock_make_request, mock_client):
+    """Test getting departments"""
+    mock_make_request.return_value = {'data': [{'id': 'DEPT001', 'name': 'Engineering'}]}
+    
+    result = mock_client.get_departments()
+    
+    assert len(result['data']) == 1
+    assert result['data'][0]['name'] == 'Engineering'
+    mock_make_request.assert_called_once_with('GET', 'configuration/departments')
+
+@patch.object(UKGAPIClient, 'make_request')
+def test_get_locations(mock_make_request, mock_client):
+    """Test getting locations"""
+    mock_make_request.return_value = {'data': [{'id': 'LOC001', 'name': 'San Francisco HQ'}]}
+    
+    result = mock_client.get_locations()
+    
+    assert len(result['data']) == 1
+    assert result['data'][0]['name'] == 'San Francisco HQ'
+    mock_make_request.assert_called_once_with('GET', 'configuration/locations')
+
+@patch.object(UKGAPIClient, 'make_request')
+def test_get_organization_hierarchy(mock_make_request, mock_client):
+    """Test getting organization hierarchy"""
+    mock_make_request.return_value = {'structure': [{'id': 'ORG001', 'name': 'CEO'}]}
+    
+    result = mock_client.get_organization_hierarchy()
+    
+    assert len(result['structure']) == 1
+    assert result['structure'][0]['name'] == 'CEO'
+    mock_make_request.assert_called_once_with('GET', 'organization/hierarchy', params={})
+
+@patch.object(UKGAPIClient, 'make_request')
+def test_get_organization_hierarchy_with_company(mock_make_request, mock_client):
+    """Test getting organization hierarchy with company filter"""
+    mock_make_request.return_value = {'structure': [{'id': 'ORG001', 'name': 'CEO'}]}
+    
+    result = mock_client.get_organization_hierarchy('company_123')
+    
+    assert len(result['structure']) == 1
+    mock_make_request.assert_called_once_with('GET', 'organization/hierarchy', params={'company_id': 'company_123'})
+
 def test_main_execution():
     """Test main execution block"""
     with patch('ukg_api_client.requests.post') as mock_post:

@@ -106,6 +106,76 @@ class UKGAPIClient:
             params['employee_id'] = employee_id
         return self.make_request("GET", "payroll/pay-stubs", params=params)
     
+    def create_deduction(self, deduction_data):
+        return self.make_request("POST", "payroll/deductions", data=deduction_data)
+
+    def get_deductions(self, employee_id):
+        params = {}
+        if employee_id:
+            params['employee_id'] = employee_id
+        return self.make_request("GET", "payroll/deductions", params=params)
+    
+    def create_tax(self, tax_data):
+        return self.make_request("POST", "payroll/taxes", data=tax_data)
+
+    def get_taxes(self, employee_id):
+        params = {}
+        if employee_id:
+            params['employee_id'] = employee_id
+        return self.make_request("GET", "payroll/taxes", params=params)
+
+    # EMPLOYEE & ORGANIZATION
+    def list_employees(self, params = None):
+        return self.make_request("GET", "employees", params=params)
+    
+    def create_employee(self, data):
+        return self.make_request("POST", "employees", data=data)
+    
+    def get_employee_by_uuid(self, employee_uuid):
+        return self.make_request("GET", f"employees/{employee_uuid}")
+    
+    def get_departments(self):
+        return self.make_request("GET", "configuration/departments")
+    
+    def get_locations(self):
+        return self.make_request("GET", "configuration/locations")
+    
+    def get_organization_hierarchy(self, company_id=None):
+        params = {}
+        if company_id:
+            params['company_id'] = company_id
+        return self.make_request("GET", "organization/hierarchy", params=params)
+    
+    def get_accrual_balances(self, employee_id, start_date, end_date):
+        params = {}
+        if employee_id:
+            params['employee_id'] = employee_id
+        if start_date:
+            params['start_date'] = start_date
+        if end_date:
+            params['end_date'] = end_date
+        return self.make_request("GET", "time-off/accrual-balances", params=params)
+    
+    def get_pto_plans(self, employee_id):
+        params = {}
+        if employee_id:
+            params['employee_id'] = employee_id
+        return self.make_request("GET", "time-off/pto-plans", params=params)
+    
+    def get_accrual_balances(self, employee_id, start_date, end_date):
+        params = {
+            'employee_id': employee_id,
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        return self.make_request("GET", "time-off/accrual-balances", params=params)
+    
+    def get_pto_plans(self, employee_id):
+        params = {}
+        if employee_id:
+            params['employee_id'] = employee_id
+        return self.make_request("GET", "time-off/pto-plans", params=params)
+
 if __name__ == '__main__':
     client = UKGAPIClient()
     companies = client.list_companies()
@@ -177,3 +247,72 @@ if __name__ == '__main__':
     # Get pay stubs
     pay_stubs = client.get_pay_stubs(employee_id="123")
     print("Pay Stubs:", pay_stubs)
+
+    # Create deduction
+    deduction_data = {
+        "employee_id": "123",
+        "name": "Health Insurance",
+        "amount": 100
+    }
+    deduction = client.create_deduction(deduction_data=deduction_data)
+    print("Created Deduction:", deduction)
+
+    # Get deductions
+    deductions = client.get_deductions(employee_id="123")
+    print("Deductions:", deductions)
+    
+    # Create tax
+    tax_data = {
+        "employee_id": "123",
+        "tax_type": "Federal Income Tax",
+        "amount": 500.00,
+        "taxable_amount": 40000.00
+    }
+    tax = client.create_tax(tax_data=tax_data)
+    print("Created Tax:", tax)
+
+    # Get taxes
+    taxes = client.get_taxes(employee_id="123")
+    print("Taxes:", taxes)
+
+    # List employees
+    employees = client.list_employees()
+    print("Employees:", employees)
+
+    # Get employee by ID (use the UUID id from the employee list)
+    employee_uuid = employees['data'][0]['id']  # Get the first employee's UUID
+    employee = client.get_employee_by_uuid(employee_uuid=employee_uuid)
+    print("Employee:", employee)
+
+    # Create employee
+    new_employee_data = {
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "Y8TtQ@example.com",
+        "phone": "123-456-7890",
+        "address": "123 Main St, Anytown, USA",
+        "city": "Anytown",
+        "state": "CA",
+        "zip_code": "12345",
+        "country": "USA",
+        "date_of_birth": "1990-01-01",
+        "hire_date": "2022-01-01",
+        "job_title": "Software Engineer",
+        "department": "IT",
+        "salary": 50000
+    }
+    new_employee = client.create_employee(data=new_employee_data)
+    print("New Employee:", new_employee)
+    
+    # Get departments
+    departments = client.get_departments()
+    print("Departments:", departments)
+    
+    # Get locations
+    locations = client.get_locations()
+    print("Locations:", locations)
+    
+    # Get organization hierarchy
+    org_hierarchy = client.get_organization_hierarchy()
+    print("Organization Hierarchy:", org_hierarchy)
+    
