@@ -305,6 +305,60 @@ def reject_time_off_request(request_id):
     req['rejected_at'] = datetime.now().isoformat()
     return jsonify(req)
 
+@app.route('/api/v2/client/time-off/accrual-balances', methods=['GET'])
+def accrual_balances():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    employee_id = request.args.get('employee_id')
+    data = [
+        {
+            'employee_id': employee_id or 'EMP001',
+            'accrual_type': 'vacation',
+            'current_balance': 120.0,
+            'accrued_ytd': 80.0,
+            'used_ytd': 40.0,
+            'projected_balance': 140.0
+        },
+        {
+            'employee_id': employee_id or 'EMP001',
+            'accrual_type': 'sick',
+            'current_balance': 24.0,
+            'accrued_ytd': 40.0,
+            'used_ytd': 16.0,
+            'projected_balance': 32.0
+        }
+    ]
+    if employee_id:
+        data = [d for d in data if d['employee_id'] == employee_id]
+    return jsonify(create_paginated_response(data))
+
+@app.route('/api/v2/client/time-off/pto-plans', methods=['GET'])
+def pto_plans():
+    if not require_auth():
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    employee_id = request.args.get('employee_id')
+    data = [
+        {
+            'plan_id': 'PTO001',
+            'name': 'Standard Vacation',
+            'type': 'vacation',
+            'accrual_rate': 6.67,
+            'max_balance': 240,
+            'carryover_limit': 40
+        },
+        {
+            'plan_id': 'PTO002',
+            'name': 'Sick Leave',
+            'type': 'sick',
+            'accrual_rate': 3.33,
+            'max_balance': 80,
+            'carryover_limit': 0
+        }
+    ]
+    return jsonify(create_paginated_response(data))
+
 @app.route('/api/v2/client/time-attendance/timesheets', methods=['GET', 'POST'])
 def timesheets():
     if not require_auth():

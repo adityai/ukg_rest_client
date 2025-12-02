@@ -145,6 +145,36 @@ class UKGAPIClient:
         if company_id:
             params['company_id'] = company_id
         return self.make_request("GET", "organization/hierarchy", params=params)
+    
+    def get_accrual_balances(self, employee_id, start_date, end_date):
+        params = {}
+        if employee_id:
+            params['employee_id'] = employee_id
+        if start_date:
+            params['start_date'] = start_date
+        if end_date:
+            params['end_date'] = end_date
+        return self.make_request("GET", "time-off/accrual-balances", params=params)
+    
+    def get_pto_plans(self, employee_id):
+        params = {}
+        if employee_id:
+            params['employee_id'] = employee_id
+        return self.make_request("GET", "time-off/pto-plans", params=params)
+    
+    def get_accrual_balances(self, employee_id, start_date, end_date):
+        params = {
+            'employee_id': employee_id,
+            'start_date': start_date,
+            'end_date': end_date
+        }
+        return self.make_request("GET", "time-off/accrual-balances", params=params)
+    
+    def get_pto_plans(self, employee_id):
+        params = {}
+        if employee_id:
+            params['employee_id'] = employee_id
+        return self.make_request("GET", "time-off/pto-plans", params=params)
 
 if __name__ == '__main__':
     client = UKGAPIClient()
