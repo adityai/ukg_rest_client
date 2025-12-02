@@ -42,6 +42,24 @@ python ukg_api_client.py
 python union_leave_workflow.py
 ```
 
+### Description: Union leave workflow
+This script demonstrates a workflow for processing a union member's time off request. It includes the following steps:
+1. **Initialization**: Sets up the UKG API client with mock credentials and base URL
+2. **Time Off Request Creation**: Creates a time off request for a specific employee
+3. **Union Entitlement Check**: Verifies if the employee is entitled to union leave
+4. **Accrual Balance Verification**: Checks if the employee has sufficient PTO accrued
+5. **Compliance Evaluation**: Assesses compliance violations and parameters related to the time off request
+6. **Approval Process**: Approves the time off request if all checks pass
+
+### Design of the external database
+Since UKG does not have a union entitlement and compliance module an external sqlite database is designed to store union entitlement and compliance data. The database includes the following tables:
+- `unions`: Stores union information
+- `union_members`: Links employees to their respective unions
+- `entitlements`: Defines various union leave entitlements
+- `member_entitlements`: Associates union members with their specific entitlements
+
+Additionally, a simple web service client 'union_entitlements_service.py' is created to get data from this external database.
+
 ## For Production (Real UKG Pro Services)
 
 To connect to actual UKG Pro web services:
